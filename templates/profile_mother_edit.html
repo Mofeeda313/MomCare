@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge badge-mother">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    Mother
+                </span>
+                <a href="{{ url_for('mother_dashboard') }}" class="btn btn-outline btn-sm">My Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container dashboard-container" style="max-width: 860px;">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="auth-card-clean" style="margin-top: 1.5rem;">
+            <div class="auth-header">
+                <div class="auth-icon-pill">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
+                </div>
+                <h2>Edit Maternal Health Profile</h2>
+                <p>Keep your contact, pregnancy progress, and emergency information accurate for optimal clinical care.
+                </p>
+            </div>
+
+            <form action="{{ url_for('mother_profile_edit') }}" method="POST" class="auth-form"
+                id="mother-profile-form">
+                <!-- 1. Personal Information Section -->
+                <h4
+                    style="color: var(--forest-primary); font-family: var(--font-heading); margin-top: 0.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+                    1. Personal & Contact Details
+                </h4>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="full_name">{{ t('Full Name') }} <span class="required">*</span></label>
+                        <input type="text" id="full_name" name="full_name" value="{{ user['full_name'] }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">{{ t('Phone Number') }} <span class="required">*</span></label>
+                        <input type="tel" id="phone" name="phone" value="{{ user['phone'] }}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dob">{{ t('Date of Birth') }}</label>
+                        <input type="date" id="dob" name="dob"
+                            value="{{ profile['dob'] if profile and profile.dob else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="blood_group">{{ t('Blood Group') }}</label>
+                        <select id="blood_group" name="blood_group">
+                            <option value="">Select {{ t('Blood Group') }}</option>
+                            {% for bg in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                            <option value="{{ bg }}" {% if profile and profile.blood_group==bg %}selected{% endif %}>{{
+                                bg }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Residential Address</label>
+                    <textarea id="address" name="address" rows="2"
+                        placeholder="House/Flat number, Street, Village or City, PIN Code"
+                        style="width: 100%; padding: 0.8rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); font-family: var(--font-body);">{{ profile['address'] if profile and profile.address else '' }}</textarea>
+                </div>
+
+                <!-- 2. Maternity & Clinical Information -->
+                <h4
+                    style="color: var(--forest-primary); font-family: var(--font-heading); margin-top: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+                    2. Maternal Health & Pregnancy Information
+                </h4>
+
+                <div class="form-group">
+                    <label for="pregnancy_status">{{ t('Pregnancy Status') }} <span class="required">*</span></label>
+                    <select id="pregnancy_status" name="pregnancy_status" required>
+                        <option value="Pregnant" {% if not profile or profile.pregnancy_status=='Pregnant' %}selected{%
+                            endif %}>Currently Pregnant</option>
+                        <option value="Postnatal" {% if profile and profile.pregnancy_status=='Postnatal' %}selected{%
+                            endif %}>Postnatal Care (Recently Delivered)</option>
+                        <option value="Not Pregnant" {% if profile and profile.pregnancy_status=='Not Pregnant'
+                            %}selected{% endif %}>Not Pregnant (Routine Maternal Care)</option>
+                    </select>
+                </div>
+
+                <div class="form-row" id="pregnancy-dates-row">
+                    <div class="form-group">
+                        <label for="lmp">Last Menstrual Period (LMP)</label>
+                        <input type="date" id="lmp" name="lmp"
+                            value="{{ profile['lmp'] if profile and profile.lmp else '' }}">
+                        <small style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                            Entering LMP automatically computes your 40-week Estimated Due Date (EDD).
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label for="edd">Estimated Due Date (EDD)</label>
+                        <input type="date" id="edd" name="edd"
+                            value="{{ profile['edd'] if profile and profile.edd else '' }}">
+                        <small style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                            Can be calculated automatically or customized per your clinical ultrasound.
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="medical_history">{{ t('Medical History') }}, Chronic Illnesses & {{ t('Allergies') }}</label>
+                    <textarea id="medical_history" name="medical_history" rows="3"
+                        placeholder="e.g. Gestational diabetes, hypertension, asthma, penicillin allergy, previous surgeries..."
+                        style="width: 100%; padding: 0.8rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); font-family: var(--font-body);">{{ profile['medical_history'] if profile and profile.medical_history else '' }}</textarea>
+                </div>
+
+                <!-- 3. {{ t('Emergency Contact') }} Details -->
+                <h4
+                    style="color: var(--forest-primary); font-family: var(--font-heading); margin-top: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+                    3. {{ t('Emergency Contact') }} Person
+                </h4>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="emergency_contact_name">{{ t('Emergency Contact') }} Name</label>
+                        <input type="text" id="emergency_contact_name" name="emergency_contact_name"
+                            placeholder="e.g. Spouse / Parent / Relative Name"
+                            value="{{ profile['emergency_contact_name'] if profile and profile.emergency_contact_name else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="emergency_contact_phone">{{ t('Emergency Contact') }} {{ t('Phone Number') }}</label>
+                        <input type="tel" id="emergency_contact_phone" name="emergency_contact_phone"
+                            placeholder="e.g. 9876543210"
+                            value="{{ profile['emergency_contact_phone'] if profile and profile.emergency_contact_phone else '' }}">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.75rem; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Profile Changes</button>
+                    <a href="{{ url_for('mother_profile_view') }}" class="btn btn-outline">{{ t('Cancel') }}</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Secure Maternal Healthcare Records.</p>
+            <p class="footer-note">Compassionate care for every mother and child.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Automatic EDD calculation from LMP (+280 days / 40 weeks)
+        document.addEventListener('DOMContentLoaded', () => {
+            const lmpInput = document.getElementById('lmp');
+            const eddInput = document.getElementById('edd');
+
+            if (lmpInput && eddInput) {
+                lmpInput.addEventListener('change', () => {
+                    const lmpVal = lmpInput.value;
+                    if (lmpVal) {
+                        const lmpDate = new Date(lmpVal);
+                        if (!isNaN(lmpDate.getTime())) {
+                            // Add 280 days
+                            const eddDate = new Date(lmpDate.getTime() + (280 * 24 * 60 * 60 * 1000));
+                            const yyyy = eddDate.getFullYear();
+                            const mm = String(eddDate.getMonth() + 1).padStart(2, '0');
+                            const dd = String(eddDate.getDate()).padStart(2, '0');
+                            eddInput.value = `${yyyy}-${mm}-${dd}`;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

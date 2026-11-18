@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mother Care Portal - MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge badge-mother">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    Mother
+                </span>
+                <span class="user-greeting-pill">{{ t('Hi, {name}', name=user['full_name']) }}</span>
+                {% if selected_child %}
+                <a href="{{ url_for('child_growth_view', child_id=selected_child.id) }}" class="btn btn-outline btn-sm">Child Growth Monitoring</a>
+                {% endif %}
+                <a href="{{ url_for('mother_profile_view') }}" class="btn btn-outline btn-sm">{{ t('My Profile') }}</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">{{ t('Sign Out') }}</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container dashboard-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Deep Forest Green Welcome Banner -->
+        <section class="dashboard-hero-banner">
+            <div class="banner-content">
+                <div class="banner-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    {{ t('Mother Care Portal') }}
+                </div>
+                <h1>{{ t('Welcome, {name}', name=user['full_name']) }}</h1>
+                <p>{{ t('Empower your maternity journey. Track prenatal wellness, nutrition, emergency contacts, and infant growth milestones all in one secure space.') }}</p>
+                <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                    <a href="{{ url_for('mother_profile_view') }}" class="btn btn-blush btn-sm">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        {{ t('View Full Profile') }}
+                    </a>
+                    <a href="{{ url_for('mother_profile_edit') }}" class="btn btn-secondary btn-sm">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                        </svg>
+                        {{ t('Edit Profile') }}
+                    </a>
+                    <a href="{{ url_for('child_add') }}" class="btn btn-primary btn-sm"
+                        style="background: #FFFFFF; color: var(--forest-primary); border-color: #FFFFFF;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        {{ t('+ Register Child') }}
+                    </a>
+                    {% if selected_child %}
+                    <a href="{{ url_for('child_growth_view', child_id=selected_child.id) }}" class="btn btn-outline btn-sm"
+                        style="color: #FFFFFF; border-color: rgba(255,255,255,0.4);">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                        </svg>
+                        {{ t('Child Growth Monitoring') }}
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('chatbot_view') }}" class="btn btn-outline btn-sm"
+                        style="color: #FFFFFF; border-color: rgba(255,255,255,0.4);">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                        {{ t('Nutrition Chatbot') }}
+                    </a>
+                </div>
+            </div>
+            <div class="banner-profile-card">
+                <div class="profile-row">
+                    <span class="profile-label">{{ t('Email') }}:</span>
+                    <span class="profile-value">{{ user['email'] }}</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label">{{ t('Phone') }}:</span>
+                    <span class="profile-value">{{ user['phone'] }}</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label">Status:</span>
+                    <span class="profile-value">
+                        {% if profile and profile.pregnancy_status == 'Pregnant' %}
+                        Pregnant
+                        {% elif profile and profile.pregnancy_status == 'Postnatal' %}
+                        Postnatal Care
+                        {% elif profile and profile.pregnancy_status == 'Not Pregnant' %}
+                        General Maternal Care
+                        {% else %}
+                        Pending Setup
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label">Due Date:</span>
+                    <span class="profile-value">{{ profile['edd'] if profile and profile.edd else 'N/A' }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Completion Progress Bar Widget -->
+        <section class="completion-container">
+            <div class="completion-header">
+                <div class="completion-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                    </svg>
+                    Maternal Health Profile Completion
+                </div>
+                <div class="completion-percent">{{ completion_pct }}% Completed</div>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" style="width: {{ completion_pct }}%;"></div>
+            </div>
+            <div class="completion-hint">
+                {% if completion_pct < 100 %} Complete your date of birth, emergency contact, and clinical history to
+                    ensure comprehensive medical safety. <a href="{{ url_for('mother_profile_edit') }}"
+                    style="font-weight: 700; text-decoration: underline; margin-left: 0.25rem;">Complete Now &rarr;</a>
+                    {% else %}
+                    <span style="color: #073528; font-weight: 600;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                            style="vertical-align: -2px;">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        Your maternal healthcare profile is completely up to date!
+                    </span>
+                    {% endif %}
+            </div>
+        </section>
+
+        <!-- In-App Clinical Immunization Reminders Callout -->
+        {% if in_app_reminders and in_app_reminders|length > 0 %}
+        <section class="vax-reminders-box">
+            <div class="vax-reminders-header">
+                <div class="vax-reminders-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    In-App Clinical Immunization Reminders
+                </div>
+                <span class="vax-reminder-disclaimer">
+                    System alert based on India's National Immunization Schedule (NIS). External SMS/WhatsApp alerts are
+                    not active.
+                </span>
+            </div>
+
+            <div class="vax-reminders-list">
+                {% for r in in_app_reminders %}
+                <div class="vax-reminder-row {{ 'overdue' if r.status == 'Overdue' else 'due' }}">
+                    <div class="vax-reminder-content">
+                        <span class="{{ 'status-pill-overdue' if r.status == 'Overdue' else 'status-pill-due' }}">
+                            {{ r.badge_text }}
+                        </span>
+                        <div class="vax-reminder-text">
+                            <strong>{{ r.child_name }}</strong>: {{ r.message }}
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span
+                            style="font-size: 0.8rem; font-weight: 700; color: var(--forest-primary); white-space: nowrap;">
+                            Due: {{ r.recommended_date }}
+                        </span>
+                        <a href="{{ url_for('child_vaccination_schedule', child_id=r.child_id) }}"
+                            class="btn btn-outline btn-xs">
+                            View Schedule
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Maternal & Child Quick Stats Cards -->
+        <section class="dashboard-stats-grid">
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                            <path d="M8 15v1a6 6 0 0 0 6 6h1" />
+                            <path d="M19 17a2 2 0 0 0 2-2V9a5 5 0 0 0-5-5" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number">
+                            {% if profile and profile.pregnancy_status == 'Pregnant' %}
+                            Pregnant
+                            {% elif profile and profile.pregnancy_status == 'Postnatal' %}
+                            Postnatal
+                            {% elif profile and profile.pregnancy_status == 'Not Pregnant' %}
+                            Routine
+                            {% else %}
+                            Active
+                            {% endif %}
+                        </div>
+                        <div class="stat-title">Maternal Status</div>
+                    </div>
+                </div>
+                <div class="stat-card-arrow">
+                    <a href="{{ url_for('mother_profile_view') }}" style="color: inherit;">&rarr;</a>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="5" />
+                            <path d="M20 21a8 8 0 1 0-16 0" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ children|length }}</div>
+                        <div class="stat-title">{{ t('Registered Children') }}</div>
+                    </div>
+                </div>
+                <div class="stat-card-arrow">
+                    <a href="#registered-children-section" style="color: inherit;">&rarr;</a>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ profile['blood_group'] if profile and profile.blood_group else 'Not
+                            set' }}</div>
+                        <div class="stat-title">Blood Group</div>
+                    </div>
+                </div>
+                <div class="stat-card-arrow">
+                    <a href="{{ url_for('mother_profile_edit') }}" style="color: inherit;">&rarr;</a>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number">
+                            {% if profile and profile.emergency_contact_phone %}
+                            Configured
+                            {% else %}
+                            Not set
+                            {% endif %}
+                        </div>
+                        <div class="stat-title">Emergency Contact</div>
+                    </div>
+                </div>
+                <div class="stat-card-arrow">
+                    <a href="{{ url_for('mother_profile_edit') }}" style="color: inherit;">&rarr;</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Registered Children Section -->
+        <section class="children-section" id="registered-children-section">
+            <div class="children-header">
+                <div>
+                    <h3 style="font-size: 1.45rem; color: var(--forest-primary); font-family: var(--font-heading);">My
+                        {{ t('Registered Children') }}</h3>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.2rem;">Detailed profiles,
+                        age monitoring, and health tracking for each child.</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('child_add') }}" class="btn btn-primary btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        + Register New Child
+                    </a>
+                </div>
+            </div>
+
+            {% if children and children|length > 0 %}
+            <div class="children-grid">
+                {% for c in children %}
+                <div class="child-card">
+                    <div>
+                        <div class="child-card-top">
+                            <div class="child-card-avatar {{ 'male' if c.gender == 'Male' else '' }}">
+                                {% if c.gender == 'Male' %}
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="10" cy="14" r="5" />
+                                    <line x1="19" y1="5" x2="13.6" y2="10.4" />
+                                    <polyline points="19 10 19 5 14 5" />
+                                </svg>
+                                {% else %}
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="9" r="5" />
+                                    <line x1="12" y1="14" x2="12" y2="21" />
+                                    <line x1="8" y1="18" x2="16" y2="18" />
+                                </svg>
+                                {% endif %}
+                            </div>
+                            <div class="child-card-title">
+                                <h4>{{ c.full_name }}</h4>
+                                <div class="child-card-age">{{ c.age_display }}</div>
+                            </div>
+                        </div>
+
+                        <div class="child-details-list">
+                            <div class="child-detail-row">
+                                <span class="child-detail-label">Date of Birth:</span>
+                                <span class="child-detail-value">{{ c.dob }}</span>
+                            </div>
+                            <div class="child-detail-row">
+                                <span class="child-detail-label">Gender:</span>
+                                <span class="child-detail-value">{{ c.gender }}</span>
+                            </div>
+                            <div class="child-detail-row">
+                                <span class="child-detail-label">Birth Weight:</span>
+                                <span class="child-detail-value">{{ c.birth_weight ~ ' kg' if c.birth_weight else 'Not
+                                    recorded' }}</span>
+                            </div>
+                            <div class="child-detail-row">
+                                <span class="child-detail-label">Blood Group:</span>
+                                <span class="child-detail-value">{{ c.blood_group or 'Not set' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="child-card-actions">
+                        <a href="{{ url_for('child_detail', child_id=c.id) }}" class="btn btn-outline btn-xs"
+                            style="flex: 1;">Details</a>
+                        <a href="{{ url_for('child_vaccination_schedule', child_id=c.id) }}"
+                            class="btn btn-primary btn-xs" style="flex: 1.2;">Immunization</a>
+                        <a href="{{ url_for('child_edit', child_id=c.id) }}" class="btn btn-secondary btn-xs"
+                            style="flex: 0.8;">Edit</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-children-box">
+                <div
+                    style="width: 56px; height: 56px; background: var(--blush-pink); border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem; color: var(--forest-primary);">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="8" r="5" />
+                        <path d="M20 21a8 8 0 1 0-16 0" />
+                    </svg>
+                </div>
+                <h4>No Children Registered Yet</h4>
+                <p>Register your child to record birth details, monitor growing age milestones, and coordinate routine
+                    clinical checkups.</p>
+                <a href="{{ url_for('child_add') }}" class="btn btn-primary btn-sm">+ Register Child Profile</a>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Phase 3: Continuous Vertical Menu Rows Child Vaccination Section -->
+        {% if children and children|length > 0 and selected_child %}
+        <section class="vax-container" id="vaccination-management-section">
+            <div class="children-header">
+                <div>
+                    <h3 style="font-size: 1.45rem; color: var(--forest-primary); font-family: var(--font-heading);">
+                        Child Immunization Schedule &amp; Records
+                    </h3>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                        Medically reviewed immunization timeline adhering to India's National Immunization Schedule
+                        (NIS).
+                    </p>
+                </div>
+                <div>
+                    <a href="{{ url_for('child_vaccination_schedule', child_id=selected_child.id) }}"
+                        class="btn btn-primary btn-sm">
+                        View Full Timeline &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <!-- Child Selection Continuous Menu Pills (if mother has multiple children) -->
+            {% if children|length > 1 %}
+            <div class="child-selector-menu">
+                <span class="child-selector-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="8" r="5" />
+                        <path d="M20 21a8 8 0 1 0-16 0" />
+                    </svg>
+                    Select Child:
+                </span>
+                {% for ch in children %}
+                <a href="{{ url_for('mother_dashboard', child_id=ch.id) }}#vaccination-management-section"
+                    class="child-select-pill {{ 'active' if ch.id == selected_child.id else '' }}">
+                    {{ ch.full_name }} ({{ ch.age_display }})
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Selected Child Immunization Summary Banner -->
+            {% if selected_child_summary %}
+            <div class="completion-container" style="margin-bottom: 1.25rem;">
+                <div class="completion-header">
+                    <div class="completion-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        {{ selected_child.full_name }}'s Immunization Status: {{ selected_child_summary.completed }} /
+                        {{ selected_child_summary.total }} Doses Received
+                    </div>
+                    <div class="completion-percent">{{ selected_child_summary.progress_pct }}%</div>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: {{ selected_child_summary.progress_pct }}%;"></div>
+                </div>
+                <div class="completion-hint"
+                    style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.65rem;">
+                    <span>
+                        <strong style="color: #991B1B;">{{ selected_child_summary.overdue }} Overdue</strong> &bull;
+                        <strong style="color: #92400E;">{{ selected_child_summary.due }} Due Now</strong> &bull;
+                        <span>{{ selected_child_summary.upcoming }} Upcoming</span>
+                    </span>
+                    {% if selected_child_summary.next_vaccine %}
+                    <span style="color: var(--forest-primary); font-weight: 600;">
+                        Next Recommended: <strong>{{ selected_child_summary.next_vaccine.vaccine_name }}</strong> on {{
+                        selected_child_summary.next_vaccine.recommended_date }}
+                    </span>
+                    {% else %}
+                    <span style="color: #065F46; font-weight: 600;">All age-appropriate doses completed.</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Continuous Vertical Menu Rows List (First 6 Upcoming / Due / Overdue Doses) -->
+            <div class="vax-vertical-list">
+                <div class="vax-list-header">
+                    <div>Vaccine &amp; Dose</div>
+                    <div>Recommended Date</div>
+                    <div>Status</div>
+                    <div>Administration Details</div>
+                    <div style="text-align: right;">Action</div>
+                </div>
+
+                {% for item in selected_child_schedule[:8] %}
+                <div
+                    class="vax-vertical-row {{ 'row-overdue' if item.status == 'Overdue' else ('row-due' if item.status == 'Due' else 'row-completed') }}">
+                    <div class="vax-name-col">
+                        <div class="vax-title-row">
+                            <span>{{ item.vaccine_name }}</span>
+                            <span class="vax-dose-tag">{{ item.dose_number }}</span>
+                        </div>
+                        <div>
+                            <span
+                                class="vax-category-badge {{ 'vax-cat-nis' if item.category == 'Government (NIS)' else 'vax-cat-opt' }}">
+                                {{ item.category }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="vax-date-col">
+                        <span class="vax-date-main">{{ item.recommended_date }}</span>
+                        <span class="vax-date-sub">{{ item.recommended_age }}</span>
+                    </div>
+
+                    <div>
+                        {% if item.status == 'Completed' %}
+                        <span class="status-pill-completed">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Completed
+                        </span>
+                        {% elif item.status == 'Overdue' %}
+                        <span class="status-pill-overdue">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                                <circle cx="12" cy="12" r="10" />
+                            </svg>
+                            Overdue
+                        </span>
+                        {% elif item.status == 'Due' %}
+                        <span class="status-pill-due">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                            Due Now
+                        </span>
+                        {% else %}
+                        <span class="status-pill-upcoming">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                            </svg>
+                            Upcoming
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="vax-admin-col">
+                        {% if item.administered_date %}
+                        <span>Given: <strong>{{ item.administered_date }}</strong></span>
+                        <span>By: {{ item.administered_by_name or 'Clinician' }}</span>
+                        {% else %}
+                        <span style="color: var(--text-muted); font-style: italic;">Scheduled</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="vax-action-col">
+                        <a href="{{ url_for('child_vaccination_schedule', child_id=selected_child.id) }}"
+                            class="btn btn-outline btn-xs">
+                            View
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div style="margin-top: 1rem; text-align: right;">
+                <a href="{{ url_for('child_vaccination_schedule', child_id=selected_child.id) }}"
+                    style="font-weight: 700; color: var(--forest-primary); font-size: 0.875rem;">
+                    See full 26-dose schedule for {{ selected_child.full_name }} &rarr;
+                </a>
+            </div>
+        </section>
+
+        <!-- Phase 4: Child Growth Monitoring Section -->
+        <section class="vax-container" id="growth-monitoring-section" style="margin-top: 2rem;">
+            <div class="children-header">
+                <div>
+                    <h3 style="font-size: 1.45rem; color: var(--forest-primary); font-family: var(--font-heading);">
+                        Child Growth &amp; Development Monitoring
+                    </h3>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                        Tracking physical milestones (weight, height, head circumference &amp; pediatric BMI) aligned with WHO standards.
+                    </p>
+                </div>
+                <div>
+                    <a href="{{ url_for('child_growth_view', child_id=selected_child.id) }}"
+                        class="btn btn-primary btn-sm">
+                        View Growth History &amp; Charts &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <!-- Current Measurements Summary Metrics -->
+            <div class="vax-summary-card" style="margin-bottom: 1.25rem;">
+                <div class="vax-summary-item">
+                    <span class="vax-summary-num">
+                        {{ selected_child_growth.weight ~ ' kg' if selected_child_growth else (selected_child.birth_weight ~ ' kg (Birth)' if selected_child.birth_weight else '—') }}
+                    </span>
+                    <span class="vax-summary-lbl">Current Weight</span>
+                </div>
+                <div class="vax-summary-item">
+                    <span class="vax-summary-num">
+                        {{ selected_child_growth.height ~ ' cm' if selected_child_growth else '—' }}
+                    </span>
+                    <span class="vax-summary-lbl">Current Height</span>
+                </div>
+                <div class="vax-summary-item">
+                    <span class="vax-summary-num">
+                        {{ selected_child_growth.head_circumference ~ ' cm' if (selected_child_growth and selected_child_growth.head_circumference) else '—' }}
+                    </span>
+                    <span class="vax-summary-lbl">Head Circumference</span>
+                </div>
+                <div class="vax-summary-item">
+                    <span class="vax-summary-num" style="color: #073528;">
+                        {{ selected_child_growth.bmi ~ ' kg/m²' if (selected_child_growth and selected_child_growth.bmi) else '—' }}
+                    </span>
+                    <span class="vax-summary-lbl">Pediatric BMI</span>
+                </div>
+                <div class="vax-summary-item">
+                    <span class="vax-summary-num" style="font-size: 1.1rem; color: #073528;">
+                        {{ selected_child_growth.measurement_date if selected_child_growth else 'Awaiting checkup' }}
+                    </span>
+                    <span class="vax-summary-lbl">Latest Visit Date</span>
+                </div>
+            </div>
+
+            {% if selected_child_growth %}
+            <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                    <div>
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--forest-primary);">
+                            Clinical Assessment:
+                        </span>
+                        <span class="status-pill-{{ 'overdue' if selected_child_growth.needs_followup else 'completed' }}" style="font-size: 0.75rem; margin-left: 0.5rem;">
+                            {{ selected_child_growth.who_status }}
+                        </span>
+                        <span style="font-size: 0.85rem; color: var(--text-secondary); margin-left: 0.5rem;">
+                            {{ selected_child_growth.status_summary }}
+                        </span>
+                    </div>
+                    {% if selected_child_growth.observations %}
+                    <div style="font-size: 0.85rem; font-style: italic; color: var(--text-primary);">
+                        "{{ selected_child_growth.observations }}" — <strong>{{ selected_child_growth.recorded_by_name }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Continuous Vertical Menu Rows: Previous Measurements -->
+            {% if selected_child_growth_history and selected_child_growth_history|length > 0 %}
+            <div class="vax-vertical-list">
+                <div class="vax-list-header">
+                    <div>Measurement Date</div>
+                    <div>Weight &amp; Gain</div>
+                    <div>Height &amp; Gain</div>
+                    <div>Head Circ &amp; BMI</div>
+                    <div style="text-align: right;">Clinical Provider</div>
+                </div>
+
+                {% for m in selected_child_growth_history|reverse %}
+                <div class="vax-vertical-row {{ 'row-overdue' if m.needs_followup else 'row-completed' }}">
+                    <div class="vax-name-col">
+                        <span style="font-weight: 700; color: var(--forest-primary);">{{ m.measurement_date }}</span>
+                        <span class="vax-dose-tag">{{ m.age_display }}</span>
+                    </div>
+                    <div class="vax-date-col">
+                        <span class="vax-date-main">{{ m.weight }} kg</span>
+                        <span class="vax-date-sub">Gain: {{ m.weight_delta_str }}</span>
+                    </div>
+                    <div class="vax-date-col">
+                        <span class="vax-date-main">{{ m.height }} cm</span>
+                        <span class="vax-date-sub">Gain: {{ m.height_delta_str }}</span>
+                    </div>
+                    <div class="vax-admin-col">
+                        <span>Head Circ: <strong>{{ m.head_circumference ~ ' cm' if m.head_circumference else '—' }}</strong></span>
+                        <span>BMI: <strong>{{ m.bmi ~ ' kg/m²' if m.bmi else '—' }}</strong></span>
+                    </div>
+                    <div style="text-align: right; font-size: 0.85rem; color: var(--text-secondary);">
+                        {{ m.recorded_by_name }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="padding: 2rem; text-align: center; color: var(--text-secondary); background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg);">
+                <p>No growth measurements recorded yet for {{ selected_child.full_name }}.</p>
+                <p style="font-size: 0.8rem; margin-top: 0.25rem;">Your local healthcare provider or field worker will log physical checkup measurements here.</p>
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 1rem; text-align: right;">
+                <a href="{{ url_for('child_growth_view', child_id=selected_child.id) }}"
+                    style="font-weight: 700; color: var(--forest-primary); font-size: 0.875rem;">
+                    Open Interactive Growth Curves &amp; Full History &rarr;
+                </a>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Information & Action Panels -->
+        <div class="dashboard-two-col">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h3>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="vertical-align: -3px;">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="16" x2="12" y2="12" />
+                            <line x1="12" y1="8" x2="12.01" y2="8" />
+                        </svg>
+                        Personalized Daily Wellness Tip
+                    </h3>
+                </div>
+                <div class="tip-box">
+                    <h4>Hydration & Iron-Rich Nutrition</h4>
+                    <p>Drink 8-10 glasses of water daily. Incorporate leafy greens, lentils, and fresh fruits to
+                        naturally support maternal energy and baby development.</p>
+                </div>
+                <div class="tip-box" style="margin-top: 1rem;">
+                    <h4>Mindful Rest & Gentle Movement</h4>
+                    <p>Short 15-minute walks and sound sleep help maintain healthy blood pressure and reduce maternal
+                        fatigue.</p>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h3>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="vertical-align: -3px;">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                            <polyline points="9 22 9 12 15 12 15 22" />
+                        </svg>
+                        Community Care & Clinical Contact
+                    </h3>
+                </div>
+                <p style="margin-bottom: 1.25rem; color: var(--text-secondary);">Your dedicated MomCare healthcare team
+                    is available for routine advice, checkup visits, and clinical assistance.</p>
+                <div class="contact-card">
+                    <div class="contact-name">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="8.5" cy="7" r="4" />
+                            <path d="M20 8v6" />
+                            <path d="M23 11h-6" />
+                        </svg>
+                        Primary Healthcare Worker (ASHA / Nurse)
+                    </div>
+                    <div class="contact-sub">Available Mon - Sat &bull; 9:00 AM - 5:00 PM</div>
+                    <div class="contact-badge">Assigned to Your Community</div>
+                </div>
+                <button class="btn btn-primary btn-block" style="margin-top: 1.5rem;"
+                    onclick="alert('Support request submitted. Your assigned healthcare worker will contact you shortly.')">Request
+                    Health Consultation</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Logged in as {{ user['full_name'] }} (Mother).</p>
+            <p class="footer-note">Compassionate Maternal & Infant Care</p>
+        </div>
+    </footer>
+</body>
+
+</html>

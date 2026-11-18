@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Child - MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge badge-mother">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    Mother
+                </span>
+                <a href="{{ url_for('mother_dashboard') }}" class="btn btn-outline btn-sm">My Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container dashboard-container" style="max-width: 800px;">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="auth-card-clean" style="margin-top: 1.5rem;">
+            <div class="auth-header">
+                <div class="auth-icon-pill">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="8" r="5" />
+                        <path d="M20 21a8 8 0 1 0-16 0" />
+                        <line x1="12" y1="14" x2="12" y2="18" />
+                        <line x1="10" y1="16" x2="14" y2="16" />
+                    </svg>
+                </div>
+                <h2>Register New Child</h2>
+                <p>Record your baby's birth details and clinical profile to begin growth tracking and routine healthcare
+                    visits.</p>
+            </div>
+
+            <form action="{{ url_for('child_add') }}" method="POST" class="auth-form" id="child-add-form">
+                <div class="form-group">
+                    <label for="full_name">Child's {{ t('Full Name') }} <span class="required">*</span></label>
+                    <input type="text" id="full_name" name="full_name" placeholder="e.g. Aarav Sharma"
+                        value="{{ form_data.full_name if form_data else '' }}" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dob">{{ t('Date of Birth') }} <span class="required">*</span></label>
+                        <input type="date" id="dob" name="dob" value="{{ form_data.dob if form_data else '' }}"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">{{ t('Gender') }} <span class="required">*</span></label>
+                        <select id="gender" name="gender" required>
+                            <option value="" disabled {% if not form_data or not form_data.gender %}selected{% endif %}>
+                                Select {{ t('Gender') }}</option>
+                            <option value="Male" {% if form_data and form_data.gender=='Male' %}selected{% endif %}>Male
+                            </option>
+                            <option value="Female" {% if form_data and form_data.gender=='Female' %}selected{% endif %}>
+                                Female</option>
+                            <option value="Other" {% if form_data and form_data.gender=='Other' %}selected{% endif %}>
+                                Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="birth_weight">{{ t('Birth Weight') }} (in kg)</label>
+                        <input type="number" step="0.01" min="0.1" max="20" id="birth_weight" name="birth_weight"
+                            placeholder="e.g. 3.25" value="{{ form_data.birth_weight if form_data else '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="blood_group">{{ t('Blood Group') }}</label>
+                        <select id="blood_group" name="blood_group">
+                            <option value="">Select {{ t('Blood Group') }} (Optional)</option>
+                            {% for bg in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                            <option value="{{ bg }}" {% if form_data and form_data.blood_group==bg %}selected{% endif
+                                %}>{{ bg }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="allergies">Known {{ t('Allergies') }} (if any)</label>
+                    <input type="text" id="allergies" name="allergies"
+                        placeholder="e.g. Dairy/Lactose, Peanuts, Penicillin (leave empty if none)"
+                        value="{{ form_data.allergies if form_data else '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="medical_history">Birth Notes & {{ t('Medical History') }}</label>
+                    <textarea id="medical_history" name="medical_history" rows="3"
+                        placeholder="e.g. Normal delivery, premature birth, neonatal jaundice, special dietary requirements..."
+                        style="width: 100%; padding: 0.8rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); font-family: var(--font-body);">{{ form_data.medical_history if form_data else '' }}</textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Child Profile</button>
+                    <a href="{{ url_for('mother_dashboard') }}" class="btn btn-outline">{{ t('Cancel') }}</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Child Healthcare Management.</p>
+            <p class="footer-note">Compassionate care for every mother and child.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

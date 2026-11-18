@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat History - MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        .history-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 860px) {
+            .history-layout { grid-template-columns: 1fr; }
+        }
+
+        /* Session list panel */
+        .session-panel {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .session-panel-header {
+            background: var(--forest-primary);
+            color: #FFFFFF;
+            padding: 1rem 1.25rem;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .session-item {
+            display: block;
+            padding: 0.9rem 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: background 0.15s;
+        }
+
+        .session-item:last-child { border-bottom: none; }
+        .session-item:hover { background: var(--warm-subtle); }
+        .session-item.active { background: var(--sage-green); }
+
+        .session-item-title {
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: var(--forest-primary);
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .session-item-meta {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .session-pill {
+            background: var(--blush-pink);
+            color: var(--blush-text);
+            border-radius: var(--radius-full);
+            padding: 1px 7px;
+            font-size: 0.68rem;
+            font-weight: 600;
+        }
+
+        .session-pill.lang {
+            background: var(--sage-green);
+            color: var(--sage-text);
+        }
+
+        /* Transcript panel */
+        .transcript-panel {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .transcript-header {
+            background: var(--warm-ivory);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .transcript-header h3 {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--forest-primary);
+            margin: 0;
+        }
+
+        .transcript-header p {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Message rows in transcript view */
+        .transcript-messages {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .hist-msg-row { display: flex; gap: 0.65rem; align-items: flex-start; }
+        .hist-msg-row.user { flex-direction: row-reverse; }
+
+        .hist-avatar {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .hist-avatar.u { background: var(--forest-primary); color: #FFFFFF; }
+        .hist-avatar.b { background: var(--sage-green); color: var(--forest-primary); }
+
+        .hist-bubble {
+            max-width: 75%;
+            padding: 0.65rem 0.9rem;
+            border-radius: var(--radius-md);
+            font-size: 0.83rem;
+            line-height: 1.6;
+        }
+
+        .hist-bubble.user-b {
+            background: var(--forest-primary);
+            color: #FFFFFF;
+            border-bottom-right-radius: 4px;
+        }
+
+        .hist-bubble.bot-b {
+            background: var(--warm-ivory);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .hist-bubble.bot-b h2, .hist-bubble.bot-b h3 {
+            font-family: var(--font-heading);
+            font-size: 0.88rem;
+            color: var(--forest-primary);
+            margin: 0.6rem 0 0.3rem;
+        }
+
+        .hist-bubble.bot-b h2:first-child,
+        .hist-bubble.bot-b h3:first-child { margin-top: 0; }
+
+        .hist-bubble.bot-b p { margin: 0.3rem 0; }
+        .hist-bubble.bot-b ul { padding-left: 1.2rem; margin: 0.3rem 0; }
+        .hist-bubble.bot-b li { margin-bottom: 0.15rem; }
+        .hist-bubble.bot-b strong { color: var(--forest-primary); }
+        .hist-bubble.bot-b hr { border: none; border-top: 1px solid var(--border-color); margin: 0.6rem 0; }
+        .hist-bubble.bot-b blockquote {
+            border-left: 3px solid var(--sage-border);
+            padding: 0.3rem 0.65rem;
+            margin: 0.4rem 0;
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .hist-time {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+
+        .hist-msg-row.user .hist-time { text-align: right; }
+
+        .empty-history {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 3rem 1.5rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 52px; height: 52px;
+            background: var(--warm-subtle);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge badge-mother">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    Mother
+                </span>
+                <span class="user-greeting-pill">Hi, {{ user['full_name'] }}</span>
+                <a href="{{ url_for('chatbot_view') }}" class="btn btn-outline btn-sm">Chatbot</a>
+                <a href="{{ url_for('mother_dashboard') }}" class="btn btn-outline btn-sm">{{ t('Dashboard') }}</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">{{ t('Sign Out') }}</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding-top: 1.5rem; padding-bottom: 2.5rem;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}"><span>{{ message }}</span></div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div style="margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+                <h1 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--forest-primary); margin:0;">{{ t('Chat History') }}</h1>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.25rem;">
+                    {{ t('Your past nutrition conversations — private to your account only.') }}
+                </p>
+            </div>
+            <a href="{{ url_for('chatbot_view') }}" class="btn btn-primary btn-sm">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                {{ t('New Conversation') }}
+            </a>
+        </div>
+
+        <div class="history-layout">
+            <!-- Session List -->
+            <div class="session-panel">
+                <div class="session-panel-header">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    {{ t('Past Conversations') }} ({{ sessions | length }})
+                </div>
+
+                {% if sessions %}
+                    {% for s in sessions %}
+                    <a href="{{ url_for('chatbot_history_detail', session_id=s.id) }}"
+                        class="session-item{% if active_session and active_session.id == s.id %} active{% endif %}">
+                        <div class="session-item-title">
+                            {{ s.first_question[:55] ~ '...' if s.first_question and s.first_question|length > 55
+                               else (s.first_question or 'Conversation ' ~ s.id) }}
+                        </div>
+                        <div class="session-item-meta">
+                            <span class="session-pill">{{ s.context }}</span>
+                            <span class="session-pill lang">{{ s.language }}</span>
+                            <span>{{ s.message_count }} message{{ 's' if s.message_count != 1 else '' }}</span>
+                        </div>
+                        <div style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.25rem;">
+                            {{ s.created_at[:10] if s.created_at else '' }}
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-history">
+                        <div class="empty-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
+                        </div>
+                        <p style="font-size: 0.82rem;">{{ t('No conversations yet. Start your first chat!') }}</p>
+                        <a href="{{ url_for('chatbot_view') }}" class="btn btn-primary btn-sm">{{ t('Start Chatting') }}</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Transcript -->
+            <div class="transcript-panel">
+                {% if active_session and messages %}
+                <div class="transcript-header">
+                    <div>
+                        <h3>
+                            {{ active_session.context }} &bull;
+                            <span style="font-weight:400; color: var(--text-secondary);">{{ active_session.language }}</span>
+                        </h3>
+                        <p>{{ messages | length }} message{{ 's' if messages | length != 1 else '' }} &bull;
+                            {{ active_session.created_at[:16] if active_session.created_at else '' }}</p>
+                    </div>
+                    <a href="{{ url_for('chatbot_view') }}" class="btn btn-secondary btn-sm">{{ t('Continue Chatting') }}</a>
+                </div>
+                <div class="transcript-messages" id="transcript-scroll">
+                    {% for msg in messages %}
+                    <div class="hist-msg-row {% if msg.role == 'user' %}user{% endif %}">
+                        <div class="hist-avatar {% if msg.role == 'user' %}u{% else %}b{% endif %}">
+                            {% if msg.role == 'user' %}
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                                </svg>
+                            {% else %}
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="hist-bubble {% if msg.role == 'user' %}user-b{% else %}bot-b{% endif %}"
+                                {% if msg.role == 'assistant' %}data-markdown="true"{% endif %}>
+                                {{ msg.content }}
+                            </div>
+                            <div class="hist-time">{{ msg.created_at[:16] if msg.created_at else '' }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% elif sessions %}
+                <div class="empty-history" style="min-height: 300px;">
+                    <div class="empty-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                    </div>
+                    <h3 style="font-family: var(--font-heading); font-size: 1rem; color: var(--forest-primary);">{{ t('Select a conversation') }}</h3>
+                    <p style="font-size: 0.82rem;">Click a past conversation on the left to view its full transcript.</p>
+                </div>
+                {% else %}
+                <div class="empty-history" style="min-height: 300px;">
+                    <div class="empty-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                    </div>
+                    <h3 style="font-family: var(--font-heading); font-size: 1rem; color: var(--forest-primary);">{{ t('No conversations yet') }}</h3>
+                    <p style="font-size: 0.82rem;">Ask your first nutrition question to get started.</p>
+                    <a href="{{ url_for('chatbot_view') }}" class="btn btn-primary btn-sm">{{ t('Start Chatting') }}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Logged in as {{ user['full_name'] }} (Mother).</p>
+            <p class="footer-note">Chat history is private to your account.</p>
+        </div>
+    </footer>
+
+    <script>
+        function renderMarkdown(text) {
+            return text
+                .replace(/^## (.+)$/gm,  '<h2>$1</h2>')
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/^• (.+)$/gm,  '<li>$1</li>')
+                .replace(/^- (.+)$/gm,  '<li>$1</li>')
+                .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+                .replace(/^---+$/gm, '<hr>')
+                .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+                .replace(/(<li>.*<\/li>\n?)+/g, (m) => '<ul>' + m + '</ul>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/^(?!<[hul]|<li|<hr|<blockquote)(.+)$/gm, '<p>$1</p>')
+                .replace(/<p><\/p>/g, '')
+                .replace(/`([^`]+)`/g, '<code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;">$1</code>');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-markdown="true"]').forEach(el => {
+                el.innerHTML = renderMarkdown(el.textContent);
+            });
+            const sc = document.getElementById('transcript-scroll');
+            if (sc) sc.scrollTop = sc.scrollHeight;
+        });
+    </script>
+</body>
+</html>
+

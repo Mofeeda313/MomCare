@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ child.full_name }} - Child Profile | MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <a href="{{ url_for('dashboard_router') }}" class="btn btn-outline btn-sm">My Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container detail-view-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="detail-view-card">
+            <div class="detail-view-header">
+                <div class="detail-view-title">
+                    <div class="child-card-avatar {{ 'male' if child.gender == 'Male' else '' }}"
+                        style="width: 64px; height: 64px;">
+                        {% if child.gender == 'Male' %}
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="10" cy="14" r="5" />
+                            <line x1="19" y1="5" x2="13.6" y2="10.4" />
+                            <polyline points="19 10 19 5 14 5" />
+                        </svg>
+                        {% else %}
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="9" r="5" />
+                            <line x1="12" y1="14" x2="12" y2="21" />
+                            <line x1="8" y1="18" x2="16" y2="18" />
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h2>{{ child.full_name }}</h2>
+                        <div class="detail-pills-row">
+                            <span class="role-pill role-pill-mother">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                </svg>
+                                Mother: {{ mother['full_name'] if mother else 'Registered Mother' }}
+                            </span>
+                            <span class="badge badge-light" style="font-weight: 700; color: var(--forest-primary);">
+                                Age: {{ child.age_display }}
+                            </span>
+                            <span
+                                class="role-pill {{ 'role-pill-worker' if child.gender == 'Male' else 'role-pill-mother' }}">
+                                {{ child.gender }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="{{ url_for('child_edit', child_id=child.id) }}" class="btn btn-secondary btn-sm">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                        </svg>
+                        Edit Details
+                    </a>
+                </div>
+            </div>
+
+            <!-- Birth & Growth Overview Grid -->
+            <h4
+                style="font-size: 1.15rem; color: var(--forest-primary); font-family: var(--font-heading); margin-bottom: 1rem;">
+                Vital Birth & Growth Statistics
+            </h4>
+            <div class="profile-grid" style="margin-bottom: 2rem;">
+                <div class="profile-item">
+                    <span class="profile-item-label">{{ t('Date of Birth') }}</span>
+                    <span class="profile-item-val">{{ child.dob }}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">Current Calculated Age</span>
+                    <span class="profile-item-val" style="color: #073528;">{{ child.age_display }}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">{{ t('Birth Weight') }}</span>
+                    <span class="profile-item-val">{{ child.birth_weight ~ ' kg' if child.birth_weight else 'Not
+                        recorded' }}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">{{ t('Blood Group') }}</span>
+                    <span class="profile-item-val">{{ child.blood_group or 'Not recorded' }}</span>
+                </div>
+            </div>
+
+            <!-- Clinical Alerts & {{ t('Allergies') }} -->
+            {% if child.allergies %}
+            <div class="clinical-note-box alert-box">
+                <h4>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px;">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    Known {{ t('Allergies') }} & Clinical Cautions
+                </h4>
+                <p>{{ child.allergies }}</p>
+            </div>
+            {% else %}
+            <div class="clinical-note-box" style="border-left-color: #10B981;">
+                <h4 style="color: #065F46;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px;">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Known {{ t('Allergies') }}
+                </h4>
+                <p>No adverse food, medicine, or environmental allergies recorded for this child.</p>
+            </div>
+            {% endif %}
+
+            <!-- {{ t('Medical History') }} -->
+            <div class="clinical-note-box" style="margin-top: 1.25rem;">
+                <h4>Birth History & Special Medical Notes</h4>
+                <p>{{ child.medical_history if child.medical_history else 'No previous pediatric conditions or
+                    complications noted.' }}</p>
+            </div>
+
+            <!-- Action buttons -->
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-top: 2.25rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; gap: 0.75rem;">
+                    <a href="{{ url_for('child_edit', child_id=child.id) }}" class="btn btn-primary">Edit Child
+                        Information</a>
+                    <a href="{{ url_for('mother_dashboard') }}" class="btn btn-outline">{{ t('Back to Dashboard') }}</a>
+                </div>
+
+                <form action="{{ url_for('child_delete', child_id=child.id) }}" method="POST"
+                    onsubmit="return confirm('Are you sure you want to permanently delete this child profile? This action cannot be undone.');">
+                    <button type="submit" class="btn btn-secondary-outline btn-sm">Remove Child Profile</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Child Healthcare Management.</p>
+            <p class="footer-note">Compassionate care for every mother and child.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

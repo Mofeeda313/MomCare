@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Control Panel - MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Administrator Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge badge-admin">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                    {{ t('Administrator') }}
+                </span>
+                <span class="user-greeting-pill">{{ user['full_name'] }}</span>
+                <a href="{{ url_for('admin_database_viewer') }}" class="btn btn-outline btn-sm">{{ t('Database Viewer') }}</a>
+                <a href="{{ url_for('home') }}" class="btn btn-outline btn-sm">{{ t('Home') }}</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">{{ t('Sign Out') }}</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container dashboard-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Deep Forest Green Welcome Banner -->
+        <section class="dashboard-hero-banner">
+            <div class="banner-content">
+                <div class="banner-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                    MomCare &bull; System Administration
+                </div>
+                <h1>{{ t('Administrator Control Panel') }}</h1>
+                <p>Oversee registered mothers, field healthcare workers, role permissions, and platform security with
+                    full clinical confidentiality.</p>
+            </div>
+            <div class="banner-profile-card">
+                <div class="profile-row">
+                    <span class="profile-label">Admin Email:</span>
+                    <span class="profile-value">{{ user['email'] }}</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label">Access Level:</span>
+                    <span class="profile-value">Full Superuser</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label">Database:</span>
+                    <span class="profile-value">SQLite (momcare.db)</span>
+                </div>
+                <div class="profile-row">
+                    <span class="profile-label">Security:</span>
+                    <span class="profile-value">Scrypt / PBKDF2</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics Cards -->
+        <section class="dashboard-stats-grid">
+            <!-- 1. Total Users (Sage Accent) -->
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ stats['total_users'] }}</div>
+                        <div class="stat-title">Total Users</div>
+                    </div>
+                </div>
+                <div class="stat-card-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </div>
+            </div>
+            <!-- 2. Registered Mothers (Blush Pink Accent) -->
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ stats['total_mothers'] }}</div>
+                        <div class="stat-title">Registered Mothers</div>
+                    </div>
+                </div>
+                <div class="stat-card-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </div>
+            </div>
+            <!-- 3. Healthcare Workers (Soft Mint Accent) -->
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                            <path d="M8 15v1a6 6 0 0 0 6 6h1" />
+                            <path d="M19 17a2 2 0 0 0 2-2V9a5 5 0 0 0-5-5" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ stats['total_workers'] }}</div>
+                        <div class="stat-title">Healthcare Workers</div>
+                    </div>
+                </div>
+                <div class="stat-card-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </div>
+            </div>
+            <!-- 4. System Administrators (Rose-Cream Accent) -->
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ stats['total_admins'] }}</div>
+                        <div class="stat-title">Administrators</div>
+                    </div>
+                </div>
+                <div class="stat-card-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- User Directory Table -->
+        <section class="table-section">
+            <div class="table-header-row">
+                <div>
+                    <h3>User Directory & Role Authorization</h3>
+                    <p class="table-sub">Live list of all user accounts stored in the MomCare database.</p>
+                </div>
+                <div class="admin-quick-actions">
+                    <a href="{{ url_for('register') }}" class="btn btn-secondary btn-sm">+ {{ t('Register') }}</a>
+                    <a href="{{ url_for('admin_database_viewer') }}" class="btn btn-secondary btn-sm">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <ellipse cx="12" cy="5" rx="9" ry="3" />
+                            <path d="M21 12c0 1.66-4.03 3-9 3S3 13.66 3 12" />
+                            <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" />
+                        </svg>
+                        Database Viewer
+                    </a>
+                    <button class="btn btn-primary btn-sm" onclick="window.location.reload()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10" />
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                        </svg>
+                        Refresh Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>Full Name</th>
+                            <th>Email Address</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                            <th>Preferred Language</th>
+                            <th>Registration Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>#{{ u['id'] }}</td>
+                            <td><strong>{{ u['full_name'] }}</strong></td>
+                            <td>{{ u['email'] }}</td>
+                            <td>{{ u['phone'] }}</td>
+                            <td>
+                                {% if u['role'] == 'Mother' %}
+                                <span class="role-pill role-pill-mother">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                        <path
+                                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                    </svg>
+                                    Mother
+                                </span>
+                                {% elif u['role'] == 'Healthcare Worker' %}
+                                <span class="role-pill role-pill-worker">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5">
+                                        <path
+                                            d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                                    </svg>
+                                    Healthcare Worker
+                                </span>
+                                {% elif u['role'] == 'Admin' %}
+                                <span class="role-pill role-pill-admin">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                    </svg>
+                                    Admin
+                                </span>
+                                {% else %}
+                                <span class="role-pill">{{ u['role'] }}</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="badge badge-light">{{ u['language'] }}</span></td>
+                            <td>{{ u['created_at'][:10] if u['created_at'] else 'Recent' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Phase 4: Clinical Governance & Growth Monitoring Reports -->
+        <section class="table-section" style="margin-top: 2rem;">
+            <div class="table-header-row">
+                <div>
+                    <h3>Clinical Governance &amp; Pediatric Growth Reports</h3>
+                    <p class="table-sub">Consolidated health system monitoring covering physical growth velocity, WHO adherence, and immunizations.</p>
+                </div>
+                <a href="{{ url_for('community_growth_directory') }}" class="btn btn-outline btn-sm">
+                    Open Growth Directory &rarr;
+                </a>
+            </div>
+
+            <div class="vax-summary-card" style="margin-top: 1rem;">
+                <div class="vax-summary-item">
+                    <span class="vax-summary-num">{{ growth_stats.total_children if growth_stats else 0 }}</span>
+                    <span class="vax-summary-lbl">Total Registered Children</span>
+                </div>
+                <div class="vax-summary-item">
+                    <span class="vax-summary-num" style="color: #065F46;">{{ growth_stats.children_measured if growth_stats else 0 }}</span>
+                    <span class="vax-summary-lbl">Children with Growth Data</span>
+                </div>
+                <div class="vax-summary-item">
+                    <span class="vax-summary-num">{{ growth_stats.total_records if growth_stats else 0 }}</span>
+                    <span class="vax-summary-lbl">Measurements Recorded</span>
+                </div>
+                <div class="vax-summary-item">
+                    <span class="vax-summary-num" style="color: {{ '#991B1B' if (growth_stats and growth_stats.needing_followup > 0) else '#065F46' }};">
+                        {{ growth_stats.needing_followup if growth_stats else 0 }}
+                    </span>
+                    <span class="vax-summary-lbl">Follow-up Flags</span>
+                </div>
+                <div class="vax-summary-item">
+                    <span class="vax-summary-num" style="color: #073528;">{{ vax_stats.total_completed if vax_stats else 0 }}</span>
+                    <span class="vax-summary-lbl">Immunizations Administered</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- System & Security Overview -->
+        <section class="card status-section" style="margin-top: 2rem;">
+            <div class="status-header">
+                <div class="status-indicator-dot"></div>
+                <h2>Security & Platform Configuration</h2>
+            </div>
+            <div class="status-grid">
+                <div class="status-item">
+                    <span class="label">Authentication Scheme:</span>
+                    <span class="value">Werkzeug Secure Cryptographic Hash</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Session Storage:</span>
+                    <span class="value">Signed HTTP Cookies</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Access Controls:</span>
+                    <span class="value">Role-Based (@role_required)</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Admin Provisioning:</span>
+                    <span class="value">Restricted CLI (create_admin.py)</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare Administrator Portal. All actions audited.</p>
+            <p class="footer-note">Compassionate care for every mother and child.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

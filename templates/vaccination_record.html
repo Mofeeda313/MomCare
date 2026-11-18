@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record Vaccination - MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge badge-worker">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                    </svg>
+                    Healthcare Provider
+                </span>
+                <a href="{{ url_for('worker_dashboard') }}" class="btn btn-outline btn-sm">Provider Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container dashboard-container" style="max-width: 800px;">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="auth-card-clean" style="margin-top: 1.5rem;">
+            <div class="auth-header">
+                <div class="auth-icon-pill" style="background: var(--sage-green); border-color: var(--sage-border);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <h2>Record Vaccination Administration</h2>
+                <p>Log a completed immunization dose for clinical validation and official maternal records.</p>
+            </div>
+
+            <!-- Beneficiary & Vaccine Metadata Box -->
+            <div class="profile-grid" style="margin-bottom: 1.75rem;">
+                <div class="profile-item">
+                    <span class="profile-item-label">{{ t('Child Name') }}</span>
+                    <span class="profile-item-val">{{ child.full_name }}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">Mother's Name</span>
+                    <span class="profile-item-val">{{ mother['full_name'] if mother else 'Registered Mother' }}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">Target Vaccine</span>
+                    <span class="profile-item-val" style="color: #073528;">{{ meta.name if meta else 'Immunization'
+                        }}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">Target Dose</span>
+                    <span class="profile-item-val">{{ meta.dose if meta else 'Dose 1' }}</span>
+                </div>
+            </div>
+
+            <form action="{{ url_for('vaccination_record_form', child_id=child.id, vaccine_code=meta.code) }}"
+                method="POST" class="auth-form" id="vax-record-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="administered_date">Date Administered <span class="required">*</span></label>
+                        <input type="date" id="administered_date" name="administered_date" value="{{ today_str }}"
+                            required>
+                        <small style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                            Date the dose was physically administered in the field or subcenter.
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="batch_number">Vaccine Batch / Lot Number</label>
+                        <input type="text" id="batch_number" name="batch_number" placeholder="e.g. SII-2026-B849">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="administered_by_name">Administering Healthcare Worker</label>
+                    <input type="text" id="administered_by_name"
+                        value="{{ session.get('user_name', 'Healthcare Staff') }}" disabled
+                        style="background: var(--warm-ivory); color: var(--text-secondary);">
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Clinical Notes / Adverse Reactions Observed</label>
+                    <textarea id="notes" name="notes" rows="3"
+                        placeholder="e.g. Administered right anterolateral thigh. No immediate adverse reaction after 15 min observation."
+                        style="width: 100%; padding: 0.8rem; border: 1.5px solid var(--border-color); border-radius: var(--radius-md); font-family: var(--font-body);"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Vaccination Record</button>
+                    <a href="{{ url_for('child_vaccination_schedule', child_id=child.id) }}"
+                        class="btn btn-outline">{{ t('Cancel') }}</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Clinical Immunization Management.</p>
+            <p class="footer-note">Compassionate care for every mother and child.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

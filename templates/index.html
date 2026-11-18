@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MomCare - Transforming Maternal & Child Healthcare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <nav class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="nav-tagline">Mother & Child Healthcare Platform</span>
+                <div class="auth-buttons">
+                    {% if session.get('user_id') %}
+                    <span class="user-greeting">Hi, <strong>{{ session.get('user_name') }}</strong> ({{
+                        session.get('user_role') }})</span>
+                    <a href="{{ url_for('dashboard_router') }}" class="btn btn-primary btn-sm">My Dashboard</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">Login</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Register</a>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Hero Section -->
+        <section class="momcare-hero">
+            <div class="momcare-hero-text">
+                <div class="momcare-hero-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    MomCare &bull; Transforming Maternal Health
+                </div>
+                <h1>Transforming maternal health</h1>
+                <p class="momcare-hero-subtitle">
+                    MomCare is a gentle, comprehensive maternal and infant care platform that offers expert support,
+                    milestone tracking, and community health services all from the comfort of home.
+                </p>
+                {% if not session.get('user_id') %}
+                <div class="momcare-hero-cta">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Register Today</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">Member Login</a>
+                </div>
+                {% else %}
+                <div class="momcare-hero-cta">
+                    <a href="{{ url_for('dashboard_router') }}" class="btn btn-primary btn-lg">Open My Dashboard
+                        &rarr;</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Floating Preview Cards -->
+            <div class="momcare-hero-cards-preview">
+                <div class="hero-visual-card blush">
+                    <div class="hero-visual-content">
+                        <h3>Complete postnatal care for mom</h3>
+                        <p>Expert consultations &bull; Personalized nutrition plans &bull; Helping staff</p>
+                    </div>
+                    <div class="hero-visual-arrow">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                            <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="hero-visual-card sage">
+                    <div class="hero-visual-content">
+                        <h3>Nutrition & pediatric specialists</h3>
+                        <p>Verified clinical guidance &bull; Infant growth milestone tracking</p>
+                    </div>
+                    <div class="hero-visual-arrow">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                            <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="hero-visual-card mint">
+                    <div class="hero-visual-content">
+                        <h3>Community healthcare workers</h3>
+                        <p>Field visits &bull; Vaccination schedule coordination &bull; Care tips</p>
+                    </div>
+                    <div class="hero-visual-arrow">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                            <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Care Specialties Row -->
+        <section class="momcare-specialties-section">
+            <h2 class="section-title">Specialized Maternal & Infant Care</h2>
+            <div class="specialties-grid">
+                <div class="specialty-item">
+                    <div class="specialty-avatar">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </div>
+                    <span class="specialty-title">Postnatal Care</span>
+                </div>
+                <div class="specialty-item">
+                    <div class="specialty-avatar">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 20V10" />
+                            <path d="M12 20V4" />
+                            <path d="M6 20v-6" />
+                        </svg>
+                    </div>
+                    <span class="specialty-title">Fitness & Rest</span>
+                </div>
+                <div class="specialty-item">
+                    <div class="specialty-avatar">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+                            <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z" />
+                            <line x1="6" y1="2" x2="6" y2="4" />
+                            <line x1="10" y1="2" x2="10" y2="4" />
+                            <line x1="14" y1="2" x2="14" y2="4" />
+                        </svg>
+                    </div>
+                    <span class="specialty-title">Nutritionist</span>
+                </div>
+                <div class="specialty-item">
+                    <div class="specialty-avatar">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="5" />
+                            <path d="M20 21a8 8 0 1 0-16 0" />
+                        </svg>
+                    </div>
+                    <span class="specialty-title">Milestones</span>
+                </div>
+                <div class="specialty-item">
+                    <div class="specialty-avatar">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                            <path d="M8 15v1a6 6 0 0 0 6 6h1" />
+                            <path d="M19 17a2 2 0 0 0 2-2V9a5 5 0 0 0-5-5" />
+                        </svg>
+                    </div>
+                    <span class="specialty-title">Field Worker</span>
+                </div>
+                <div class="specialty-item">
+                    <div class="specialty-avatar">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 12h6" />
+                            <path d="M12 9v6" />
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                    </div>
+                    <span class="specialty-title">Immunization</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Database Connection Status Card -->
+        <section class="status-section">
+            <div class="card status-card">
+                <div class="status-header">
+                    <div class="status-indicator-dot"></div>
+                    <h2>System & Database Live Status</h2>
+                </div>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="label">Application:</span>
+                        <span class="value">{{ info['app_name'] if info else 'MomCare' }}</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Database:</span>
+                        <span class="value badge-success">SQLite Connected</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Backend:</span>
+                        <span class="value">Flask (Python)</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">Status:</span>
+                        <span class="value badge-info">{{ info['status'] if info else 'Ready' }}</span>
+                    </div>
+                </div>
+
+                <div class="action-row">
+                    <button id="test-connection-btn" class="btn btn-primary">Check API & DB Live Health</button>
+                    <span id="health-result" class="health-result"></span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Transforming Maternal & Child Healthcare.</p>
+            <p class="footer-note">Compassionate care for every mother and child.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

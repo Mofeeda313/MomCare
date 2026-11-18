@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaccination Schedule - {{ child.full_name }} | MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge {{ 'badge-mother' if user_role == 'Mother' else 'badge-worker' }}">
+                    {% if user_role == 'Mother' %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    Mother
+                    {% else %}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                    </svg>
+                    Healthcare Provider
+                    {% endif %}
+                </span>
+                <a href="{{ url_for('dashboard_router') }}" class="btn btn-outline btn-sm">My Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container dashboard-container" style="max-width: 1060px;">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Child Banner & Summary -->
+        <div class="profile-overview-card" style="margin-top: 1.5rem;">
+            <div class="profile-card-header">
+                <div style="display: flex; align-items: center; gap: 1.25rem;">
+                    <div class="child-card-avatar {{ 'male' if child.gender == 'Male' else '' }}"
+                        style="width: 60px; height: 60px;">
+                        {% if child.gender == 'Male' %}
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="10" cy="14" r="5" />
+                            <line x1="19" y1="5" x2="13.6" y2="10.4" />
+                            <polyline points="19 10 19 5 14 5" />
+                        </svg>
+                        {% else %}
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="9" r="5" />
+                            <line x1="12" y1="14" x2="12" y2="21" />
+                            <line x1="8" y1="18" x2="16" y2="18" />
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h2
+                            style="font-size: 1.75rem; color: var(--forest-primary); font-family: var(--font-heading); margin-bottom: 0.2rem;">
+                            {{ child.full_name }} — Immunization Schedule
+                        </h2>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            <span class="role-pill role-pill-mother">Mother: {{ mother['full_name'] if mother else
+                                'Registered' }}</span>
+                            <span class="badge badge-light" style="font-weight: 700;">DOB: {{ child.dob }} ({{
+                                child.age_display }})</span>
+                            <span class="badge badge-light">{{ t('Gender') }}: {{ child.gender }}</span>
+                            {% if child.blood_group %}
+                            <span class="badge badge-light">Blood: {{ child.blood_group }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="{{ url_for('child_detail', child_id=child.id) }}" class="btn btn-outline btn-sm">Child
+                        Profile</a>
+                    <a href="{{ url_for('dashboard_router') }}" class="btn btn-secondary btn-sm">{{ t('Back to Dashboard') }}</a>
+                </div>
+            </div>
+
+            <!-- Immunization Progress Bar -->
+            <div class="completion-container" style="margin-bottom: 1.5rem;">
+                <div class="completion-header">
+                    <div class="completion-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        National Immunization Schedule (NIS) Progress
+                    </div>
+                    <div class="completion-percent">{{ summary.completed }} of {{ summary.total }} Completed ({{
+                        summary.progress_pct }}%)</div>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: {{ summary.progress_pct }}%;"></div>
+                </div>
+                <div class="completion-hint"
+                    style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                    <span>
+                        <strong>{{ summary.overdue }} Overdue</strong> &bull;
+                        <strong>{{ summary.due }} Due Now</strong> &bull;
+                        <strong>{{ summary.upcoming }} Upcoming</strong>
+                    </span>
+                    {% if summary.next_vaccine %}
+                    <span style="color: var(--forest-primary); font-weight: 600;">
+                        Next Recommended: <strong>{{ summary.next_vaccine.vaccine_name }}</strong> on {{
+                        summary.next_vaccine.recommended_date }}
+                    </span>
+                    {% else %}
+                    <span
+                        style="color: #065F46; font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        All scheduled doses completed to date.
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- In-App Clinical Reminders Callout -->
+        {% if reminders and reminders|length > 0 %}
+        <div class="vax-reminders-box">
+            <div class="vax-reminders-header">
+                <div class="vax-reminders-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    In-App Clinical Immunization Reminders
+                </div>
+                <span class="vax-reminder-disclaimer">
+                    System alerts based on India's National Immunization Schedule (NIS). External SMS/WhatsApp alerts
+                    are not active.
+                </span>
+            </div>
+
+            <div class="vax-reminders-list">
+                {% for r in reminders %}
+                <div class="vax-reminder-row {{ 'overdue' if r.status == 'Overdue' else 'due' }}">
+                    <div class="vax-reminder-content">
+                        <span class="{{ 'status-pill-overdue' if r.status == 'Overdue' else 'status-pill-due' }}">
+                            {{ r.badge_text }}
+                        </span>
+                        <div class="vax-reminder-text">
+                            <strong>{{ r.vaccine_name }} ({{ r.dose_number }})</strong>: {{ r.message }}
+                        </div>
+                    </div>
+                    <div
+                        style="font-size: 0.8rem; font-weight: 700; color: var(--forest-primary); white-space: nowrap;">
+                        Due: {{ r.recommended_date }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Continuous Vertical Menu Rows Filter Tabs -->
+        <div class="vax-filter-nav" id="vax-filter-nav">
+            <a href="{{ url_for('child_vaccination_schedule', child_id=child.id, status='all') }}"
+                data-filter="all"
+                class="vax-filter-pill {{ 'active' if status_filter == 'all' else '' }}">
+                All Schedule ({{ all_schedule|length }})
+            </a>
+            <a href="{{ url_for('child_vaccination_schedule', child_id=child.id, status='overdue') }}"
+                data-filter="overdue"
+                class="vax-filter-pill {{ 'active' if status_filter == 'overdue' else '' }}">
+                Overdue ({{ summary.overdue }})
+            </a>
+            <a href="{{ url_for('child_vaccination_schedule', child_id=child.id, status='due') }}"
+                data-filter="due"
+                class="vax-filter-pill {{ 'active' if status_filter == 'due' else '' }}">
+                Due Now ({{ summary.due }})
+            </a>
+            <a href="{{ url_for('child_vaccination_schedule', child_id=child.id, status='upcoming') }}"
+                data-filter="upcoming"
+                class="vax-filter-pill {{ 'active' if status_filter == 'upcoming' else '' }}">
+                Upcoming ({{ summary.upcoming }})
+            </a>
+            <a href="{{ url_for('child_vaccination_schedule', child_id=child.id, status='completed') }}"
+                data-filter="completed"
+                class="vax-filter-pill {{ 'active' if status_filter == 'completed' else '' }}">
+                Completed ({{ summary.completed }})
+            </a>
+        </div>
+
+        <!-- Continuous Vertical Menu Rows Container -->
+        <div class="vax-vertical-list" id="vax-list-container">
+            <div class="vax-list-header">
+                <div>Vaccine &amp; Dose</div>
+                <div>Recommended Age / Due Date</div>
+                <div>Immunization {{ t('Status') }}</div>
+                <div>Administration Details</div>
+                <div style="text-align: right;">Action</div>
+            </div>
+
+            {% if all_schedule and all_schedule|length > 0 %}
+            {% for item in all_schedule %}
+            <div
+                class="vax-vertical-row {{ 'row-overdue' if item.status == 'Overdue' else ('row-due' if item.status == 'Due' else 'row-completed') }}"
+                data-status="{{ item.status|lower }}"
+                {% if status_filter != 'all' and item.status|lower != status_filter %}style="display: none;"{% endif %}>
+                <!-- Column 1: Vaccine & Category -->
+                <div class="vax-name-col">
+                    <div class="vax-title-row">
+                        <span>{{ item.vaccine_name }}</span>
+                        <span class="vax-dose-tag">{{ item.dose_number }}</span>
+                    </div>
+                    <div>
+                        <span
+                            class="vax-category-badge {{ 'vax-cat-nis' if item.category == 'Government (NIS)' else 'vax-cat-opt' }}">
+                            {{ item.category }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Column 2: Recommended Timing -->
+                <div class="vax-date-col">
+                    <span class="vax-date-main">{{ item.recommended_date }}</span>
+                    <span class="vax-date-sub">Age: {{ item.recommended_age }}</span>
+                </div>
+
+                <!-- Column 3: {{ t('Status') }} -->
+                <div>
+                    {% if item.status == 'Completed' %}
+                    <span class="status-pill-completed">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        Completed
+                    </span>
+                    {% elif item.status == 'Overdue' %}
+                    <span class="status-pill-overdue">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                            <circle cx="12" cy="12" r="10" />
+                        </svg>
+                        Overdue
+                    </span>
+                    {% elif item.status == 'Due' %}
+                    <span class="status-pill-due">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        Due Now
+                    </span>
+                    {% else %}
+                    <span class="status-pill-upcoming">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                        </svg>
+                        Upcoming
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Column 4: Administration Details -->
+                <div class="vax-admin-col">
+                    {% if item.administered_date %}
+                    <span>Given: <strong>{{ item.administered_date }}</strong></span>
+                    <span>By: {{ item.administered_by_name or 'Healthcare Staff' }}</span>
+                    {% if item.batch_number %}
+                    <span>Batch: <code>{{ item.batch_number }}</code></span>
+                    {% endif %}
+                    {% else %}
+                    <span style="color: var(--text-muted); font-style: italic;">Pending administration</span>
+                    {% endif %}
+                </div>
+
+                <!-- Column 5: Actions -->
+                <div class="vax-action-col">
+                    {% if user_role in ('Healthcare Worker', 'Admin') %}
+                    {% if item.status == 'Completed' %}
+                    <a href="{{ url_for('vaccination_edit_form', record_id=item.record_id) }}"
+                        class="btn btn-secondary btn-xs">
+                        Correct
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('vaccination_record_form', child_id=child.id, vaccine_code=item.vaccine_code) }}"
+                        class="btn btn-primary btn-xs">
+                        Record Dose
+                    </a>
+                    {% endif %}
+                    {% else %}
+                    {% if item.status == 'Completed' %}
+                    <span style="font-size: 0.775rem; color: #065F46; font-weight: 600;">Verified</span>
+                    {% else %}
+                    <span style="font-size: 0.775rem; color: var(--text-muted);">Scheduled</span>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- In-place empty notice when filter yields 0 matches -->
+            <div id="vax-empty-filter"
+                style="{% if (status_filter == 'overdue' and summary.overdue == 0) or (status_filter == 'due' and summary.due == 0) or (status_filter == 'upcoming' and summary.upcoming == 0) or (status_filter == 'completed' and summary.completed == 0) %}{% else %}display: none;{% endif %} padding: 2.5rem; text-align: center; color: var(--text-secondary);">
+                No vaccinations match the selected filter (<span id="vax-empty-status-name">{{ status_filter|capitalize }}</span>).
+                <div style="margin-top: 0.75rem;">
+                    <button type="button" id="vax-show-all-btn" class="btn btn-outline btn-xs" style="cursor: pointer;">View All Doses</button>
+                </div>
+            </div>
+            {% else %}
+            <div style="padding: 2.5rem; text-align: center; color: var(--text-secondary);">
+                No vaccinations scheduled for this child profile.
+            </div>
+            {% endif %}
+        </div>
+
+        <div
+            style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <a href="{{ url_for('dashboard_router') }}" class="btn btn-outline">Return to Dashboard</a>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">
+                Guideline: Medically aligned with Ministry of Health &amp; Family Welfare, Government of India.
+            </span>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Child Immunization Management.</p>
+            <p class="footer-note">Compassionate care for every mother and child.</p>
+        </div>
+    </footer>
+
+    <!-- Instant Client-Side Filter Handling (Prevents Page Reloads & Scroll Movement) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterPills = document.querySelectorAll('.vax-filter-pill');
+            const vaxRows = document.querySelectorAll('.vax-vertical-row');
+            const emptyNotice = document.getElementById('vax-empty-filter');
+            const empty{{ t('Status') }}Name = document.getElementById('vax-empty-status-name');
+            const showAllBtn = document.getElementById('vax-show-all-btn');
+
+            function applyFilter(filterKey, updateUrl) {
+                if (typeof updateUrl === 'undefined') {
+                    updateUrl = true;
+                }
+                const normalizedKey = (filterKey || 'all').toLowerCase();
+                let matchCount = 0;
+
+                // 1. Update active tab highlight immediately
+                filterPills.forEach(pill => {
+                    const pillFilter = (pill.getAttribute('data-filter') || '').toLowerCase();
+                    if (pillFilter === normalizedKey) {
+                        pill.classList.add('active');
+                    } else {
+                        pill.classList.remove('active');
+                    }
+                });
+
+                // 2. Filter records in-place without page jumping or scrolling
+                vaxRows.forEach(row => {
+                    const row{{ t('Status') }} = (row.getAttribute('data-status') || '').toLowerCase();
+                    if (normalizedKey === 'all' || row{{ t('Status') }} === normalizedKey) {
+                        row.style.display = '';
+                        matchCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                // 3. Show empty notice if no records match
+                if (emptyNotice) {
+                    if (matchCount === 0) {
+                        if (empty{{ t('Status') }}Name) {
+                            empty{{ t('Status') }}Name.textContent = normalizedKey.charAt(0).toUpperCase() + normalizedKey.slice(1);
+                        }
+                        emptyNotice.style.display = 'block';
+                    } else {
+                        emptyNotice.style.display = 'none';
+                    }
+                }
+
+                // 4. Update URL without causing page reload or scroll reset
+                if (updateUrl && window.history && window.history.replaceState) {
+                    const url = new URL(window.location.href);
+                    if (normalizedKey === 'all') {
+                        url.searchParams.delete('status');
+                    } else {
+                        url.searchParams.set('status', normalizedKey);
+                    }
+                    window.history.replaceState(null, '', url.pathname + url.search);
+                }
+            }
+
+            // Click listener for each filter tab
+            filterPills.forEach(pill => {
+                pill.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const filter = this.getAttribute('data-filter');
+                    applyFilter(filter, true);
+                });
+            });
+
+            // "View All Doses" button inside the empty state notice
+            if (showAllBtn) {
+                showAllBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    applyFilter('all', true);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

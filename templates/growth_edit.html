@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correct Growth Measurement - MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge badge-worker">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                    </svg>
+                    Healthcare Provider
+                </span>
+                <a href="{{ url_for('child_growth_view', child_id=child.id) }}" class="btn btn-outline btn-sm">Child Growth</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container dashboard-container" style="max-width: 800px;">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="auth-card-clean" style="margin-top: 1.5rem;">
+            <div class="auth-header">
+                <div class="auth-icon-pill" style="background: var(--blush-pink); border-color: var(--blush-border);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                </div>
+                <h2>Correct Child Growth Measurement</h2>
+                <p>Modify an existing physical growth record while preserving full clinical audit history in accordance with healthcare standards.</p>
+            </div>
+
+            <!-- Existing Record Metadata Box -->
+            <div class="profile-grid" style="margin-bottom: 1.75rem;">
+                <div class="profile-item">
+                    <span class="profile-item-label">{{ t('Child Name') }}</span>
+                    <span class="profile-item-val">{{ child.full_name }}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">Mother's Name</span>
+                    <span class="profile-item-val">{{ mother['full_name'] if mother else 'Registered Mother' }}</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">Original Recorded Value</span>
+                    <span class="profile-item-val" style="color: #073528;">
+                        {{ record.weight }} kg &bull; {{ record.height }} cm
+                    </span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-item-label">Original Clinician</span>
+                    <span class="profile-item-val">{{ record.recorded_by_name }}</span>
+                </div>
+            </div>
+
+            <form action="{{ url_for('growth_edit_form', measurement_id=record.id) }}" method="POST" class="auth-form" id="growth-edit-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="measurement_date">{{ t('Measurement Date') }} <span class="required">*</span></label>
+                        <input type="date" id="measurement_date" name="measurement_date" value="{{ record.measurement_date }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recorded_by_name">Correcting Clinician</label>
+                        <input type="text" id="recorded_by_name" value="{{ session.get('user_name', 'Healthcare Staff') }}" readonly
+                            style="background-color: var(--sage-green-light); cursor: not-allowed;">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="weight">{{ t('Weight (kg)') }} <span class="required">*</span></label>
+                        <input type="number" step="0.01" min="0.5" max="100" id="weight" name="weight"
+                            value="{{ record.weight }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="height">Height / Length (cm) <span class="required">*</span></label>
+                        <input type="number" step="0.1" min="20" max="200" id="height" name="height"
+                            value="{{ record.height }}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="head_circumference">{{ t('Head Circumference (cm)') }} <span style="font-size: 0.75rem; color: var(--text-muted);">(Optional)</span></label>
+                        <input type="number" step="0.1" min="20" max="70" id="head_circumference" name="head_circumference"
+                            value="{{ record.head_circumference or '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Calculated {{ t('BMI (kg/m²)') }}</label>
+                        <div id="live-bmi-box" style="padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: #FAF7F2; display: flex; align-items: center; justify-content: space-between;">
+                            <span id="live-bmi-value" style="font-size: 1.15rem; font-weight: 700; color: var(--forest-primary);">{{ record.bmi or '—' }} kg/m²</span>
+                            <span id="live-bmi-note" style="font-size: 0.775rem; color: #065F46;">Updated automatically</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="observations">Observations / Notes</label>
+                    <textarea id="observations" name="observations" rows="2">{{ record.observations or '' }}</textarea>
+                </div>
+
+                <div class="form-group" style="background: var(--blush-pink-light); border: 1px solid var(--blush-border); padding: 1.25rem; border-radius: var(--radius-md); margin-top: 1rem;">
+                    <label for="change_reason" style="color: var(--forest-primary); font-weight: 700;">
+                        Clinical Correction Reason <span class="required">*</span>
+                    </label>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                        A mandatory reason is required to maintain transparency and legal compliance in health records.
+                    </p>
+                    <input type="text" id="change_reason" name="change_reason"
+                        placeholder="e.g., Typographical weight entry error corrected from maternal health card" required>
+                </div>
+
+                <div class="form-actions" style="margin-top: 1.75rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <a href="{{ url_for('child_growth_view', child_id=child.id) }}" class="btn btn-outline">{{ t('Cancel') }}</a>
+                    <button type="submit" class="btn btn-primary">Save Clinical Correction</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Child Physical Development Monitoring.</p>
+        </div>
+    </footer>
+
+    <!-- Live BMI update script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const weightInput = document.getElementById('weight');
+            const heightInput = document.getElementById('height');
+            const bmiValue = document.getElementById('live-bmi-value');
+
+            function updateBMI() {
+                const w = parseFloat(weightInput.value);
+                const h = parseFloat(heightInput.value);
+                if (w > 0 && h > 0) {
+                    const h_m = h / 100.0;
+                    bmiValue.textContent = (w / (h_m * h_m)).toFixed(1) + ' kg/m²';
+                } else {
+                    bmiValue.textContent = '—';
+                }
+            }
+
+            weightInput.addEventListener('input', updateBMI);
+            heightInput.addEventListener('input', updateBMI);
+        });
+    </script>
+</body>
+
+</html>
+

@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrition Chatbot - MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ── Chatbot Page Layout ───────────────────────────────────────── */
+        .chatbot-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 860px) {
+            .chatbot-layout { grid-template-columns: 1fr; }
+            .chatbot-sidebar { display: none; }
+        }
+
+        /* ── Sidebar ────────────────────────────────────────────────────── */
+        .chatbot-sidebar {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            background: var(--forest-primary);
+            color: #FFFFFF;
+            padding: 1rem 1.25rem;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-section {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-section:last-child { border-bottom: none; }
+
+        .sidebar-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            margin-bottom: 0.6rem;
+        }
+
+        /* Context selector rows */
+        .context-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.55rem 0.75rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            border: 1px solid transparent;
+            transition: background 0.15s, border-color 0.15s;
+            text-decoration: none;
+            width: 100%;
+            background: none;
+            text-align: left;
+            font-family: var(--font-body);
+        }
+
+        .context-row:hover {
+            background: var(--sage-green-light);
+            border-color: var(--sage-border);
+        }
+
+        .context-row.active {
+            background: var(--sage-green);
+            border-color: var(--sage-border);
+            color: var(--forest-primary);
+            font-weight: 600;
+        }
+
+        .context-row svg { flex-shrink: 0; color: var(--forest-secondary); }
+
+        /* Language pills row */
+        .lang-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            transition: background 0.15s;
+            text-decoration: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: var(--font-body);
+        }
+
+        .lang-row:hover { background: var(--blush-pink-light); color: var(--blush-text); }
+
+        .lang-row.active {
+            background: var(--blush-pink);
+            color: var(--blush-text);
+            border-color: var(--blush-border);
+            font-weight: 600;
+        }
+
+        .lang-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--blush-text);
+            flex-shrink: 0;
+        }
+
+        /* Child selector rows */
+        .child-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.55rem 0.75rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.82rem;
+            color: var(--text-primary);
+            border: 1px solid transparent;
+            transition: background 0.15s;
+            text-decoration: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: var(--font-body);
+        }
+
+        .child-row:hover { background: var(--warm-subtle); }
+        .child-row.active { background: var(--sage-green); border-color: var(--sage-border); font-weight: 600; }
+
+        /* ── Main Chat Area ─────────────────────────────────────────────── */
+        .chatbot-main {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-header-bar {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .chat-header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .chat-header-title h2 {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--forest-primary);
+            margin: 0;
+        }
+
+        .chat-header-title p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .chat-icon-wrap {
+            width: 44px; height: 44px;
+            background: var(--sage-green);
+            border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--forest-primary);
+            flex-shrink: 0;
+        }
+
+        .chat-header-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+        .context-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: var(--sage-green);
+            color: var(--forest-primary);
+            border-radius: var(--radius-full);
+            padding: 0.3rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .lang-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: var(--blush-pink);
+            color: var(--blush-text);
+            border-radius: var(--radius-full);
+            padding: 0.3rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* ── Safety Notice ───────────────────────────────────────────────── */
+        .safety-notice {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            background: var(--warning-bg);
+            border: 1px solid #FDE68A;
+            border-radius: var(--radius-md);
+            padding: 0.9rem 1.1rem;
+            font-size: 0.8rem;
+            color: var(--warning-text);
+            line-height: 1.5;
+        }
+
+        .safety-notice svg { flex-shrink: 0; margin-top: 1px; }
+
+        /* ── Setup Notice (no API key) ─────────────────────────────────── */
+        .setup-notice {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            background: var(--sage-green-light);
+            border: 1px solid var(--sage-border);
+            border-radius: var(--radius-md);
+            padding: 0.9rem 1.1rem;
+            font-size: 0.8rem;
+            color: var(--sage-text);
+            line-height: 1.5;
+        }
+
+        /* ── Chat Window ─────────────────────────────────────────────────── */
+        .chat-window {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 460px;
+            max-height: 560px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        /* Welcome placeholder */
+        .chat-welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 2rem;
+            color: var(--text-secondary);
+            text-align: center;
+            flex: 1;
+        }
+
+        .chat-welcome-icon {
+            width: 56px; height: 56px;
+            background: var(--sage-green);
+            border-radius: var(--radius-full);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--forest-primary);
+        }
+
+        .chat-welcome h3 {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--forest-primary);
+            margin: 0;
+        }
+
+        .chat-welcome p { font-size: 0.82rem; margin: 0; max-width: 280px; }
+
+        /* Suggestion chips */
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        .chip {
+            background: var(--warm-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-full);
+            padding: 0.35rem 0.85rem;
+            font-size: 0.78rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            font-family: var(--font-body);
+        }
+
+        .chip:hover {
+            background: var(--sage-green);
+            border-color: var(--sage-border);
+            color: var(--forest-primary);
+        }
+
+        /* Chat bubbles */
+        .msg-row {
+            display: flex;
+            gap: 0.65rem;
+            align-items: flex-start;
+        }
+
+        .msg-row.user { flex-direction: row-reverse; }
+
+        .msg-avatar {
+            width: 32px; height: 32px;
+            border-radius: var(--radius-full);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .msg-avatar.user-av { background: var(--forest-primary); color: #FFFFFF; }
+        .msg-avatar.bot-av  { background: var(--sage-green); color: var(--forest-primary); }
+
+        .msg-bubble {
+            max-width: 75%;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            line-height: 1.65;
+        }
+
+        .msg-bubble.user-bubble {
+            background: var(--forest-primary);
+            color: #FFFFFF;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-bubble.bot-bubble {
+            background: var(--warm-ivory);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Render markdown-ish formatting in bot bubble */
+        .msg-bubble.bot-bubble h2, .msg-bubble.bot-bubble h3 {
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            color: var(--forest-primary);
+            margin: 0.75rem 0 0.35rem;
+        }
+
+        .msg-bubble.bot-bubble h2:first-child,
+        .msg-bubble.bot-bubble h3:first-child { margin-top: 0; }
+
+        .msg-bubble.bot-bubble p { margin: 0.35rem 0; }
+        .msg-bubble.bot-bubble ul { padding-left: 1.25rem; margin: 0.35rem 0; }
+        .msg-bubble.bot-bubble li { margin-bottom: 0.2rem; }
+        .msg-bubble.bot-bubble strong { color: var(--forest-primary); }
+        .msg-bubble.bot-bubble hr { border: none; border-top: 1px solid var(--border-color); margin: 0.75rem 0; }
+        .msg-bubble.bot-bubble blockquote {
+            border-left: 3px solid var(--sage-border);
+            padding: 0.35rem 0.75rem;
+            margin: 0.5rem 0;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .msg-time {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            text-align: right;
+        }
+
+        .msg-row.user .msg-time { text-align: right; }
+        .msg-row:not(.user) .msg-time { text-align: left; }
+
+        /* Typing indicator */
+        .typing-row { display: flex; gap: 0.65rem; align-items: flex-start; }
+
+        .typing-bubble {
+            background: var(--warm-ivory);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            border-bottom-left-radius: 4px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 7px; height: 7px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        /* ── Input Bar ───────────────────────────────────────────────────── */
+        .chat-input-area {
+            border-top: 1px solid var(--border-color);
+            padding: 0.9rem 1.1rem;
+            background: #FAFAF8;
+            display: flex;
+            gap: 0.65rem;
+            align-items: flex-end;
+        }
+
+        .chat-input-wrap {
+            flex: 1;
+            position: relative;
+        }
+
+        #chat-input {
+            width: 100%;
+            padding: 0.65rem 1rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-family: var(--font-body);
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+            max-height: 120px;
+            transition: border-color 0.15s;
+        }
+
+        #chat-input:focus { border-color: var(--forest-secondary); }
+        #chat-input::placeholder { color: var(--text-muted); }
+
+        .chat-send-btn {
+            width: 42px; height: 42px;
+            background: var(--forest-primary);
+            color: #FFFFFF;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+
+        .chat-send-btn:hover { background: var(--forest-secondary); }
+        .chat-send-btn:disabled { background: var(--text-muted); cursor: not-allowed; }
+
+        .char-count {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 3px;
+        }
+
+        .char-count.warn { color: #EF4444; }
+    </style>
+</head>
+
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge badge-mother">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    Mother
+                </span>
+                <span class="user-greeting-pill">Hi, {{ user['full_name'] }}</span>
+                <a href="{{ url_for('mother_dashboard') }}" class="btn btn-outline btn-sm">Dashboard</a>
+                <a href="{{ url_for('chatbot_history') }}" class="btn btn-outline btn-sm">Chat History</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding-top: 1.5rem; padding-bottom: 2.5rem;">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}"><span>{{ message }}</span></div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Page heading -->
+        <div style="margin-bottom: 1rem;">
+            <h1 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--forest-primary); margin:0;">
+                {{ t('Nutrition Chatbot') }}
+            </h1>
+            <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.25rem;">
+                {{ t('Ask about vitamins, minerals, food sources, pregnancy and child nutrition.') }}
+            </p>
+        </div>
+
+        <!-- Safety Notice -->
+        <div class="safety-notice" style="margin-bottom: 1rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <span>
+                <strong>{{ t('Health Notice:') }}</strong> {{ t('This chatbot provides general nutrition awareness and education only. It is not a substitute for medical advice. Always consult a qualified healthcare professional for clinical concerns, pregnancy complications, or questions about medications and supplements.') }}
+            </span>
+        </div>
+
+        {% if not gemini_configured %}
+        <div class="setup-notice" style="margin-bottom: 1rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span>
+                <strong>Built-in Knowledge Base Active.</strong>
+                The Gemini AI API key is not configured. The chatbot is using a comprehensive built-in
+                nutrition knowledge base covering all major vitamins, minerals, and Indian dietary guidance.
+                To enable the full AI, set the <code>GEMINI_API_KEY</code> environment variable.
+            </span>
+        </div>
+        {% endif %}
+
+        <div class="chatbot-layout">
+            <!-- ── Sidebar ─────────────────────────────────────────── -->
+            <aside class="chatbot-sidebar">
+                <!-- Context -->
+                <div class="sidebar-header">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    {{ t('Chat Settings') }}
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-label">{{ t('Your Context') }}</div>
+                    {% set contexts = [
+                        ('General Nutrition', t('General Nutrition'), 'M 9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0h10m-10 0l-3 3m13-3l3 3M9 14v7m10-7v7'),
+                        ('Pregnancy', t('Pregnancy'),         'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z'),
+                        ('Postnatal Care', t('Postnatal Care'),    'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'),
+                        ('Child Nutrition', t('Child Nutrition'),   'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75')
+                    ] %}
+                    {% for ctx_key, ctx_label, icon_path in contexts %}
+                    <button
+                        class="context-row{% if context == ctx_key %} active{% endif %}"
+                        onclick="setContext('{{ ctx_key }}')"
+                        type="button">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="{{ icon_path }}" />
+                        </svg>
+                        {{ ctx_label }}
+                    </button>
+                    {% endfor %}
+                </div>
+
+                <!-- Language -->
+                <div class="sidebar-section">
+                    <div class="sidebar-label">{{ t('Language') }}</div>
+                    {% for l in [('English', 'English'), ('Malayalam', 'മലയാളം (Malayalam)'), ('Hindi', 'हिन्दी (Hindi)'), ('Kannada', 'ಕನ್ನಡ (Kannada)')] %}
+                    <button
+                        class="lang-row{% if current_lang == l[0] %} active{% endif %}"
+                        onclick="setLanguage('{{ l[0] }}')"
+                        type="button">
+                        <span class="lang-dot"></span>
+                        {{ l[1] }}
+                    </button>
+                    {% endfor %}
+                </div>
+
+                <!-- Children -->
+                {% if children %}
+                <div class="sidebar-section">
+                    <div class="sidebar-label">{{ t('Your Children') }}</div>
+                    <button
+                        class="child-row{% if not selected_child %} active{% endif %}"
+                        onclick="setChild(null)"
+                        type="button">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                        </svg>
+                        {{ t('No child selected') }}
+                    </button>
+                    {% for child in children %}
+                    <button
+                        class="child-row{% if selected_child and selected_child.id == child.id %} active{% endif %}"
+                        onclick="setChild({{ child.id }})"
+                        type="button">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        {{ child.full_name }}
+                    </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- New conversation -->
+                <div class="sidebar-section">
+                    <form action="{{ url_for('chatbot_new_session') }}" method="post">
+                        <input type="hidden" name="csrf_token" value="">
+                        <button type="submit" class="btn btn-secondary btn-sm btn-block">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            {{ t('New Conversation') }}
+                        </button>
+                    </form>
+                    <a href="{{ url_for('chatbot_history') }}" class="btn btn-outline btn-sm btn-block" style="margin-top:0.5rem;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        {{ t('View History') }}
+                    </a>
+                </div>
+            </aside>
+
+            <!-- ── Main Chat ───────────────────────────────────────── -->
+            <div class="chatbot-main">
+                <!-- Header bar -->
+                <div class="chat-header-bar">
+                    <div class="chat-header-title">
+                        <div class="chat-icon-wrap">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2>{{ t('MomCare Nutrition Assistant') }}</h2>
+                            <p>{{ t('Ask about vitamins, minerals, food sources, pregnancy and child nutrition.') }}</p>
+                        </div>
+                    </div>
+                    <div class="chat-header-actions">
+                        <span class="context-pill" id="context-display">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                            </svg>
+                            {{ context }}
+                        </span>
+                        <span class="lang-pill" id="lang-display">
+                            {{ language }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Chat window -->
+                <div class="chat-window" id="chat-window">
+                    <div class="chat-messages" id="chat-messages">
+                        {% if messages %}
+                            {% for msg in messages %}
+                            <div class="msg-row {% if msg.role == 'user' %}user{% endif %}">
+                                <div class="msg-avatar {% if msg.role == 'user' %}user-av{% else %}bot-av{% endif %}">
+                                    {% if msg.role == 'user' %}
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
+                                        </svg>
+                                    {% else %}
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                        </svg>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="msg-bubble {% if msg.role == 'user' %}user-bubble{% else %}bot-bubble{% endif %}" id="bubble-hist-{{ loop.index }}">
+                                        {% if msg.role == 'user' %}{{ msg.content }}{% else %}{{ msg.content }}{% endif %}
+                                    </div>
+                                    <div class="msg-time">{{ msg.created_at[:16] if msg.created_at else '' }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                        <!-- Welcome placeholder -->
+                        <div class="chat-welcome" id="chat-welcome">
+                            <div class="chat-welcome-icon">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                </svg>
+                            </div>
+                            <h3>Welcome, {{ user['full_name'].split()[0] }}!</h3>
+                            <p>{{ t('Ask me anything about nutrition, vitamins, minerals, or healthy eating for you and your child.') }}</p>
+                            <div class="suggestion-chips">
+                                <button class="chip" onclick="useSuggestion('What foods are rich in iron?')">{{ t('Iron-rich foods') }}</button>
+                                <button class="chip" onclick="useSuggestion('What should I eat during pregnancy?')">{{ t('Pregnancy diet') }}</button>
+                                <button class="chip" onclick="useSuggestion('What are the symptoms of Vitamin D deficiency?')">{{ t('Vitamin D deficiency') }}</button>
+                                <button class="chip" onclick="useSuggestion('Which foods contain calcium?')">{{ t('Calcium sources') }}</button>
+                                <button class="chip" onclick="useSuggestion('What foods are good for my baby?')">{{ t('Baby foods') }}</button>
+                                <button class="chip" onclick="useSuggestion('Which foods are rich in folate?')">{{ t('Folate sources') }}</button>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Input bar -->
+                    <div class="chat-input-area">
+                        <div class="chat-input-wrap">
+                            <textarea
+                                id="chat-input"
+                                rows="1"
+                                maxlength="1000"
+                                placeholder="{{ t('Type your question about nutrition...') }}"
+                                autocomplete="off"
+                            ></textarea>
+                            <div class="char-count" id="char-count">0 / 1000</div>
+                        </div>
+                        <button class="chat-send-btn" id="send-btn" onclick="sendMessage()" aria-label="Send message">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- End chat window -->
+            </div>
+            <!-- End chatbot-main -->
+        </div>
+        <!-- End chatbot-layout -->
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Logged in as {{ user['full_name'] }} (Mother).</p>
+            <p class="footer-note">Nutrition Awareness — Not Medical Advice</p>
+        </div>
+    </footer>
+
+    <script>
+        // ── State ──────────────────────────────────────────────────────────
+        let currentContext  = {{ context | tojson }};
+        let currentLanguage = {{ language | tojson }};
+        let currentChildId  = {{ selected_child.id if selected_child else 'null' }};
+        let currentSessionId = {{ active_session_id if active_session_id else 'null' }};
+        let isLoading = false;
+
+        // ── Render markdown-ish text into HTML ─────────────────────────────
+        function renderMarkdown(text) {
+            return text
+                // Headers
+                .replace(/^## (.+)$/gm,  '<h2>$1</h2>')
+                .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                // Bold
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                // Italic
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                // Bullet points
+                .replace(/^• (.+)$/gm,  '<li>$1</li>')
+                .replace(/^- (.+)$/gm,  '<li>$1</li>')
+                .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+                // HR
+                .replace(/^---+$/gm, '<hr>')
+                // Blockquote
+                .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+                // Wrap consecutive <li> in <ul>
+                .replace(/(<li>.*<\/li>\n?)+/g, (match) => '<ul>' + match + '</ul>')
+                // Paragraphs
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/^(?!<[hul]|<li|<hr|<blockquote)(.+)$/gm, '<p>$1</p>')
+                // Clean up empty <p>
+                .replace(/<p><\/p>/g, '')
+                // Inline code
+                .replace(/`([^`]+)`/g, '<code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;">$1</code>');
+        }
+
+        // ── Scroll to bottom of chat ────────────────────────────────────────
+        function scrollBottom() {
+            const el = document.getElementById('chat-messages');
+            if (el) el.scrollTop = el.scrollHeight;
+        }
+
+        // ── Remove welcome placeholder ──────────────────────────────────────
+        function removeWelcome() {
+            const w = document.getElementById('chat-welcome');
+            if (w) w.remove();
+        }
+
+        // ── Append a bubble ─────────────────────────────────────────────────
+        function appendBubble(role, text, timeStr) {
+            removeWelcome();
+            const container = document.getElementById('chat-messages');
+            const isUser = role === 'user';
+            const now = timeStr || new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+
+            const row = document.createElement('div');
+            row.className = 'msg-row' + (isUser ? ' user' : '');
+
+            const avatarSvg = isUser
+                ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>`
+                : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+
+            const bubbleContent = isUser
+                ? `<div class="msg-bubble user-bubble">${escapeHtml(text)}</div>`
+                : `<div class="msg-bubble bot-bubble">${renderMarkdown(text)}</div>`;
+
+            row.innerHTML = `
+                <div class="msg-avatar ${isUser ? 'user-av' : 'bot-av'}">${avatarSvg}</div>
+                <div>
+                    ${bubbleContent}
+                    <div class="msg-time">${now}</div>
+                </div>`;
+
+            container.appendChild(row);
+            scrollBottom();
+            return row;
+        }
+
+        function escapeHtml(s) {
+            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // ── Typing indicator ───────────────────────────────────────────────
+        let typingRow = null;
+
+        function showTyping() {
+            removeWelcome();
+            const container = document.getElementById('chat-messages');
+            typingRow = document.createElement('div');
+            typingRow.className = 'typing-row';
+            typingRow.innerHTML = `
+                <div class="msg-avatar bot-av">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <div class="typing-bubble">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>`;
+            container.appendChild(typingRow);
+            scrollBottom();
+        }
+
+        function hideTyping() {
+            if (typingRow) { typingRow.remove(); typingRow = null; }
+        }
+
+        // ── Send message ───────────────────────────────────────────────────
+        async function sendMessage() {
+            if (isLoading) return;
+            const input = document.getElementById('chat-input');
+            const question = input.value.trim();
+            if (!question) return;
+
+            isLoading = true;
+            document.getElementById('send-btn').disabled = true;
+            input.value = '';
+            updateCharCount();
+
+            appendBubble('user', question);
+            showTyping();
+
+            try {
+                const resp = await fetch('/chatbot/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        question,
+                        context:    currentContext,
+                        language:   currentLanguage,
+                        child_id:   currentChildId,
+                        session_id: currentSessionId
+                    })
+                });
+
+                const data = await resp.json();
+                hideTyping();
+
+                if (resp.ok) {
+                    currentSessionId = data.session_id;
+                    appendBubble('assistant', data.response);
+                } else {
+                    appendBubble('assistant', 'Sorry, I could not process your question. Please try again.');
+                }
+            } catch (err) {
+                hideTyping();
+                appendBubble('assistant', 'A network error occurred. Please check your connection and try again.');
+            }
+
+            isLoading = false;
+            document.getElementById('send-btn').disabled = false;
+            input.focus();
+        }
+
+        // ── Suggestion chips ───────────────────────────────────────────────
+        function useSuggestion(text) {
+            document.getElementById('chat-input').value = text;
+            updateCharCount();
+            sendMessage();
+        }
+
+        // ── Context / Language / Child setters ─────────────────────────────
+        function setContext(ctx) {
+            currentContext = ctx;
+            document.getElementById('context-display').innerHTML =
+                `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/></svg> ${ctx}`;
+            document.querySelectorAll('.context-row').forEach(b => {
+                b.classList.toggle('active', b.textContent.trim() === ctx);
+            });
+        }
+
+        function setLanguage(lang) {
+            window.location.href = '/set-language/' + encodeURIComponent(lang);
+        }
+
+        function setChild(id) {
+            currentChildId = id;
+            if (id !== null) { setContext('Child Nutrition', t('Child Nutrition')); }
+            document.querySelectorAll('.child-row').forEach(b => {
+                const bid = b.getAttribute('onclick').match(/setChild\((\d+|null)\)/);
+                if (bid) {
+                    const v = bid[1] === 'null' ? null : parseInt(bid[1]);
+                    b.classList.toggle('active', v === id);
+                }
+            });
+        }
+
+        // ── Char count ─────────────────────────────────────────────────────
+        function updateCharCount() {
+            const inp = document.getElementById('chat-input');
+            const cc  = document.getElementById('char-count');
+            const len = inp.value.length;
+            cc.textContent = len + ' / 1000';
+            cc.classList.toggle('warn', len > 900);
+        }
+
+        // ── Auto-resize textarea ────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const inp = document.getElementById('chat-input');
+
+            inp.addEventListener('input', () => {
+                inp.style.height = 'auto';
+                inp.style.height = Math.min(inp.scrollHeight, 120) + 'px';
+                updateCharCount();
+            });
+
+            inp.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Render any existing bot bubbles from history
+            document.querySelectorAll('.bot-bubble[id^="bubble-hist-"]').forEach(el => {
+                el.innerHTML = renderMarkdown(el.textContent);
+            });
+
+            scrollBottom();
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ child.full_name }} &bull; Growth Monitoring - MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <a href="{{ url_for('home') }}" class="logo-link">
+                    <span class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                    </span>
+                    <span class="logo-text">MomCare</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                {% if user_role == 'Mother' %}
+                <span class="role-badge badge-mother">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    Mother
+                </span>
+                <a href="{{ url_for('mother_dashboard') }}" class="btn btn-outline btn-sm">Mother Dashboard</a>
+                {% elif user_role in ('Healthcare Worker', 'Admin') %}
+                <span class="role-badge badge-worker">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                    </svg>
+                    Healthcare Provider
+                </span>
+                <a href="{{ url_for('worker_dashboard') }}" class="btn btn-outline btn-sm">Provider Dashboard</a>
+                <a href="{{ url_for('community_growth_directory') }}" class="btn btn-outline btn-sm">Growth Directory</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container dashboard-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Header Hero Banner -->
+        <div class="vax-header-card">
+            <div class="vax-header-info">
+                <div class="vax-badge">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                    </svg>
+                    Child Growth &amp; Development Monitoring
+                </div>
+                <h2>{{ child.full_name }} &bull; Growth Records</h2>
+                <div class="vax-meta-row">
+                    <span>DOB: <strong>{{ child.dob }}</strong></span> &bull;
+                    <span>{{ t('Gender') }}: <strong>{{ child.gender }}</strong></span> &bull;
+                    <span>{{ t('Birth Weight') }}: <strong>{{ child.birth_weight or '—' }} kg</strong></span> &bull;
+                    <span>Mother: <strong>{{ mother['full_name'] if mother else 'Registered Mother' }}</strong></span>
+                </div>
+            </div>
+            <div class="vax-header-action" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                {% if user_role in ('Healthcare Worker', 'Admin') %}
+                <a href="{{ url_for('growth_record_form', child_id=child.id) }}" class="btn btn-primary btn-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Record New Measurement
+                </a>
+                {% endif %}
+                <a href="{{ url_for('child_vaccination_schedule', child_id=child.id) }}" class="btn btn-outline btn-sm">
+                    View Immunizations
+                </a>
+            </div>
+        </div>
+
+        <!-- Sibling Children Selector Menu (If multiple children exist) -->
+        {% if sibling_children and sibling_children|length > 1 %}
+        <div class="child-selector-menu" style="margin-top: 1rem;">
+            <span class="child-selector-label">Select Child:</span>
+            {% for sib in sibling_children %}
+            <a href="{{ url_for('child_growth_view', child_id=sib.id) }}"
+                class="child-selector-pill {{ 'active' if sib.id == child.id else '' }}">
+                {{ sib.full_name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Latest Measurement Metrics Card -->
+        <div class="vax-summary-card" style="margin-top: 1.5rem;">
+            <div class="vax-summary-item">
+                <span class="vax-summary-num">{{ latest.weight ~ ' kg' if latest else (child.birth_weight ~ ' kg (Birth)' if child.birth_weight else '—') }}</span>
+                <span class="vax-summary-lbl">Current Weight</span>
+            </div>
+            <div class="vax-summary-item">
+                <span class="vax-summary-num">{{ latest.height ~ ' cm' if latest else '—' }}</span>
+                <span class="vax-summary-lbl">Current Height / Length</span>
+            </div>
+            <div class="vax-summary-item">
+                <span class="vax-summary-num">{{ latest.head_circumference ~ ' cm' if (latest and latest.head_circumference) else '—' }}</span>
+                <span class="vax-summary-lbl">Head Circumference</span>
+            </div>
+            <div class="vax-summary-item">
+                <span class="vax-summary-num" style="color: #073528;">{{ latest.bmi ~ ' kg/m²' if (latest and latest.bmi) else '—' }}</span>
+                <span class="vax-summary-lbl">Pediatric BMI</span>
+            </div>
+            <div class="vax-summary-item">
+                <span class="vax-summary-num" style="font-size: 1.1rem; color: #073528;">
+                    {% if latest %}
+                        {{ latest.measurement_date }}
+                    {% else %}
+                        Pending
+                    {% endif %}
+                </span>
+                <span class="vax-summary-lbl">Latest Checkup Date</span>
+            </div>
+        </div>
+
+        <!-- WHO Standards Clinical Guidance Banner -->
+        <div class="vax-reminders-box" style="margin-top: 1.25rem;">
+            <div class="vax-reminders-header">
+                <div class="vax-reminders-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                    WHO Child Growth Standards (0 to 5 Years)
+                </div>
+                <span class="vax-reminder-disclaimer">
+                    Clinical reference percentiles validated by the World Health Organization Multicentre Growth Reference Study.
+                </span>
+            </div>
+            <div style="padding: 1rem 1.5rem; font-size: 0.85rem; color: var(--forest-primary); line-height: 1.5;">
+                {% if who_ref %}
+                    For a <strong>{{ who_ref.gender }}</strong> at <strong>{{ who_ref.milestone_month }} months</strong>:
+                    WHO Median Weight is <strong>{{ who_ref.w_med }} kg</strong> (Standard healthy range: {{ who_ref.w_min }} to {{ who_ref.w_max }} kg),
+                    Median Length/Height is <strong>{{ who_ref.h_med }} cm</strong>, and
+                    Median Head Circumference is <strong>{{ who_ref.hc_med }} cm</strong>.
+                    {% if latest and latest.needs_followup %}
+                        <div style="margin-top: 0.5rem; color: #991B1B; font-weight: 600;">
+                            {{ t('Status') }}: {{ latest.status_summary }}
+                        </div>
+                    {% elif latest %}
+                        <div style="margin-top: 0.5rem; color: #065F46; font-weight: 600;">
+                            {{ t('Status') }}: {{ latest.status_summary }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    Child is over 5 years old. Measurements are documented per standard pediatric clinical guidelines without speculative reference categories.
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Interactive Growth Chart Area -->
+        <div class="vax-vertical-list" style="margin-top: 1.75rem; padding: 1.75rem; background: #FFFFFF;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+                <div>
+                    <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.15rem; color: var(--forest-primary); margin: 0;">
+                        Interactive Child Growth Curves
+                    </h3>
+                    <p style="font-size: 0.825rem; color: var(--text-secondary); margin: 0.25rem 0 0 0;">
+                        Visualizing physical development trajectory over clinical checkup visits.
+                    </p>
+                </div>
+
+                <!-- Chart Toggle Pills -->
+                <div class="vax-filter-nav" style="margin: 0;">
+                    <button type="button" class="vax-filter-pill active" id="btn-chart-weight" onclick="switchChart('weight')">
+                        {{ t('Weight (kg)') }}
+                    </button>
+                    <button type="button" class="vax-filter-pill" id="btn-chart-height" onclick="switchChart('height')">
+                        {{ t('Height (cm)') }}
+                    </button>
+                    <button type="button" class="vax-filter-pill" id="btn-chart-head" onclick="switchChart('head')">
+                        {{ t('Head Circumference (cm)') }}
+                    </button>
+                </div>
+            </div>
+
+            {% if history and history|length > 0 %}
+            <!-- SVG Interactive Chart Container -->
+            <div id="chart-viewport" style="width: 100%; min-height: 280px; position: relative;">
+                <svg id="growth-svg" viewBox="0 0 800 280" style="width: 100%; height: auto; overflow: visible;">
+                    <!-- Grid Lines and Axes rendered via JavaScript -->
+                </svg>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; font-size: 0.775rem; color: var(--text-secondary);">
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <span style="width: 12px; height: 12px; background: #073528; border-radius: 50%;"></span>
+                        Child Measured Value
+                    </span>
+                    <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <span style="width: 16px; height: 2px; background: #0B4032; border-bottom: 2px dashed #0B4032;"></span>
+                        Growth Curve
+                    </span>
+                    {% if who_ref %}
+                    <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <span style="width: 16px; height: 2px; background: #78857D;"></span>
+                        WHO Reference Median
+                    </span>
+                    {% endif %}
+                </div>
+                <span>Hover over points to inspect clinical measurement values.</span>
+            </div>
+            {% else %}
+            <div style="padding: 2.5rem; text-align: center; color: var(--text-secondary);">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    style="margin-bottom: 0.5rem; opacity: 0.6;">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+                <p>No growth measurements recorded yet for {{ child.full_name }}.</p>
+                {% if user_role in ('Healthcare Worker', 'Admin') %}
+                <div style="margin-top: 0.75rem;">
+                    <a href="{{ url_for('growth_record_form', child_id=child.id) }}" class="btn btn-primary btn-xs">
+                        Record First Measurement
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Continuous Vertical Menu Rows: Complete Growth Measurement History -->
+        <div style="margin-top: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.15rem; color: var(--forest-primary); margin: 0;">
+                    Complete Growth Measurement History
+                </h3>
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">
+                    Total Recorded Visits: <strong>{{ history|length }}</strong>
+                </span>
+            </div>
+
+            <div class="vax-vertical-list">
+                <div class="vax-list-header">
+                    <div>Date &amp; Age</div>
+                    <div>Weight &amp; Delta</div>
+                    <div>Height &amp; Delta</div>
+                    <div>Head Circ &amp; BMI</div>
+                    <div>Observations &amp; Provider</div>
+                    <div style="text-align: right;">Action</div>
+                </div>
+
+                {% if history and history|length > 0 %}
+                {% for item in history|reverse %}
+                <div class="vax-vertical-row {{ 'row-overdue' if item.needs_followup else 'row-completed' }}">
+                    <!-- Column 1: Date & Age -->
+                    <div class="vax-name-col">
+                        <div class="vax-title-row">
+                            <span style="font-weight: 700; color: var(--forest-primary);">{{ item.measurement_date }}</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.15rem;">
+                            Age: <strong>{{ item.age_display }}</strong>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Weight & Delta -->
+                    <div class="vax-date-col">
+                        <span class="vax-date-main">{{ item.weight }} kg</span>
+                        <span class="vax-date-sub" style="color: {{ '#991B1B' if (item.weight_delta and item.weight_delta < 0) else ('#065F46' if (item.weight_delta and item.weight_delta > 0) else 'var(--text-muted)') }};">
+                            Gain: {{ item.weight_delta_str }}
+                        </span>
+                    </div>
+
+                    <!-- Column 3: Height & Delta -->
+                    <div class="vax-date-col">
+                        <span class="vax-date-main">{{ item.height }} cm</span>
+                        <span class="vax-date-sub">
+                            Gain: {{ item.height_delta_str }}
+                        </span>
+                    </div>
+
+                    <!-- Column 4: Head Circ & BMI -->
+                    <div class="vax-admin-col">
+                        <span>Head Circ: <strong>{{ item.head_circumference ~ ' cm' if item.head_circumference else '—' }}</strong></span>
+                        <span>BMI: <strong>{{ item.bmi ~ ' kg/m²' if item.bmi else '—' }}</strong></span>
+                    </div>
+
+                    <!-- Column 5: Observations & Provider -->
+                    <div class="vax-admin-col">
+                        <span>Staff: <strong>{{ item.recorded_by_name }}</strong></span>
+                        {% if item.observations %}
+                        <span style="font-style: italic; color: var(--text-primary);">"{{ item.observations }}"</span>
+                        {% endif %}
+                        <div style="margin-top: 0.25rem;">
+                            <span class="status-pill-{{ 'overdue' if item.needs_followup else 'completed' }}" style="font-size: 0.725rem;">
+                                {{ item.who_status }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Column 6: Actions -->
+                    <div class="vax-action-col">
+                        {% if user_role in ('Healthcare Worker', 'Admin') %}
+                        <a href="{{ url_for('growth_edit_form', measurement_id=item.id) }}"
+                            class="btn btn-secondary btn-xs">
+                            Correct
+                        </a>
+                        {% else %}
+                        <span style="font-size: 0.775rem; color: #065F46; font-weight: 600;">Verified</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div style="padding: 2.5rem; text-align: center; color: var(--text-secondary);">
+                    No clinical growth measurements logged yet.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <a href="{{ url_for('dashboard_router') }}" class="btn btn-outline">Return to Dashboard</a>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">
+                Guideline: Medically aligned with WHO Child Growth Standards &amp; Ministry of Health &amp; Family Welfare.
+            </span>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Child Growth &amp; Development Monitoring.</p>
+            <p class="footer-note">Compassionate care for every mother and child.</p>
+        </div>
+    </footer>
+
+    <!-- Interactive SVG Chart Renderer -->
+    <script>
+        const growthHistory = {{ history|tojson }};
+        let currentMetric = 'weight';
+
+        function switchChart(metric) {
+            currentMetric = metric;
+            document.querySelectorAll('#btn-chart-weight, #btn-chart-height, #btn-chart-head').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById('btn-chart-' + metric);
+            if (activeBtn) activeBtn.classList.add('active');
+            renderChart();
+        }
+
+        function renderChart() {
+            const svg = document.getElementById('growth-svg');
+            if (!svg || !growthHistory || growthHistory.length === 0) return;
+
+            // Clear previous SVG contents
+            while (svg.firstChild) {
+                svg.removeChild(svg.firstChild);
+            }
+
+            const width = 800;
+            const height = 280;
+            const padLeft = 60;
+            const padRight = 40;
+            const padTop = 30;
+            const padBottom = 45;
+
+            // Extract data series
+            const points = growthHistory.map((item, idx) => {
+                let val = 0;
+                if (currentMetric === 'weight') val = parseFloat(item.weight) || 0;
+                else if (currentMetric === 'height') val = parseFloat(item.height) || 0;
+                else if (currentMetric === 'head') val = parseFloat(item.head_circumference) || 0;
+                return {
+                    idx: idx,
+                    date: item.measurement_date,
+                    val: val,
+                    age: item.age_display,
+                    who: item.who_ref
+                };
+            }).filter(p => p.val > 0);
+
+            if (points.length === 0) return;
+
+            // Determine bounds
+            let minVal = Math.min(...points.map(p => p.val));
+            let maxVal = Math.max(...points.map(p => p.val));
+            if (minVal === maxVal) {
+                minVal = Math.max(0, minVal - 2);
+                maxVal = maxVal + 2;
+            } else {
+                const range = maxVal - minVal;
+                minVal = Math.max(0, minVal - range * 0.15);
+                maxVal = maxVal + range * 0.15;
+            }
+
+            const chartW = width - padLeft - padRight;
+            const chartH = height - padTop - padBottom;
+
+            function getX(idx) {
+                if (points.length === 1) return padLeft + chartW / 2;
+                return padLeft + (idx / (points.length - 1)) * chartW;
+            }
+
+            function getY(val) {
+                return padTop + chartH - ((val - minVal) / (maxVal - minVal)) * chartH;
+            }
+
+            // Draw horizontal grid lines
+            const gridSteps = 4;
+            for (let i = 0; i <= gridSteps; i++) {
+                const gVal = minVal + (i / gridSteps) * (maxVal - minVal);
+                const gy = getY(gVal);
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', padLeft);
+                line.setAttribute('y1', gy);
+                line.setAttribute('x2', width - padRight);
+                line.setAttribute('y2', gy);
+                line.setAttribute('stroke', '#E8E3DA');
+                line.setAttribute('stroke-dasharray', '3 3');
+                svg.appendChild(line);
+
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', padLeft - 10);
+                label.setAttribute('y', gy + 4);
+                label.setAttribute('text-anchor', 'end');
+                label.setAttribute('fill', '#78857D');
+                label.setAttribute('font-size', '11');
+                label.setAttribute('font-family', 'Inter, sans-serif');
+                label.textContent = gVal.toFixed(1);
+                svg.appendChild(label);
+            }
+
+            // Draw line connecting measured points
+            if (points.length > 1) {
+                let pathData = `M ${getX(0)} ${getY(points[0].val)}`;
+                for (let i = 1; i < points.length; i++) {
+                    pathData += ` L ${getX(i)} ${getY(points[i].val)}`;
+                }
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke', '#073528');
+                path.setAttribute('stroke-width', '3');
+                path.setAttribute('stroke-linejoin', 'round');
+                svg.appendChild(path);
+            }
+
+            // Draw measured data points with tooltips
+            points.forEach((p, idx) => {
+                const cx = getX(idx);
+                const cy = getY(p.val);
+
+                // Date Label on X Axis
+                const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                xLabel.setAttribute('x', cx);
+                xLabel.setAttribute('y', height - 15);
+                xLabel.setAttribute('text-anchor', 'middle');
+                xLabel.setAttribute('fill', '#19382E');
+                xLabel.setAttribute('font-size', '11');
+                xLabel.setAttribute('font-weight', '500');
+                xLabel.setAttribute('font-family', 'Inter, sans-serif');
+                xLabel.textContent = p.date;
+                svg.appendChild(xLabel);
+
+                // Outer halo
+                const circleHalo = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circleHalo.setAttribute('cx', cx);
+                circleHalo.setAttribute('cy', cy);
+                circleHalo.setAttribute('r', '8');
+                circleHalo.setAttribute('fill', '#DCE9DF');
+                circleHalo.setAttribute('opacity', '0.7');
+                svg.appendChild(circleHalo);
+
+                // Center dot
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', cx);
+                circle.setAttribute('cy', cy);
+                circle.setAttribute('r', '5');
+                circle.setAttribute('fill', '#073528');
+                circle.setAttribute('stroke', '#FFFFFF');
+                circle.setAttribute('stroke-width', '2');
+                circle.style.cursor = 'pointer';
+
+                // Interactive value label above point
+                const valLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                valLabel.setAttribute('x', cx);
+                valLabel.setAttribute('y', cy - 12);
+                valLabel.setAttribute('text-anchor', 'middle');
+                valLabel.setAttribute('fill', '#073528');
+                valLabel.setAttribute('font-size', '12');
+                valLabel.setAttribute('font-weight', '700');
+                valLabel.setAttribute('font-family', 'Poppins, sans-serif');
+                const unit = currentMetric === 'weight' ? ' kg' : ' cm';
+                valLabel.textContent = p.val + unit;
+                svg.appendChild(valLabel);
+
+                svg.appendChild(circle);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChart();
+        });
+    </script>
+</body>
+
+</html>
+
