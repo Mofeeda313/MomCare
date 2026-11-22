@@ -30,7 +30,7 @@
             </div>
             <nav class="nav-actions">
                 {% include '_language_picker.html' %}
-                <a href="{{ url_for('register') }}" class="btn btn-outline btn-sm">New here? Register</a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline btn-sm">{{ t('Register Now') }}</a>
             </nav>
         </div>
     </header>
@@ -45,20 +45,19 @@
                             <path
                                 d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                         </svg>
-                        MomCare &bull; Maternal Care
+                        MomCare &bull; {{ t('Mother Care Portal') }}
                     </div>
-                    <h1>Transforming maternal health</h1>
+                    <h1>{{ t('Transforming maternal health') }}</h1>
                     <p class="brand-showcase-desc">
-                        A peaceful and empowering space for mothers and healthcare workers to access consultations,
-                        track growth milestones, and monitor everyday wellness.
+                        {{ t('MomCare is a gentle, comprehensive maternal and infant care platform that offers expert support, milestone tracking, and community health services all from the comfort of home.') }}
                     </p>
                 </div>
 
                 <div class="brand-showcase-previews">
                     <div class="feature-preview-card">
                         <div class="feature-preview-text">
-                            <h4>Complete care for mom</h4>
-                            <p>Expert consultations &bull; Personalized nutrition</p>
+                            <h4>{{ t('Complete postnatal care for mom') }}</h4>
+                            <p>{{ t('Expert consultations • Personalized nutrition plans • Helping staff') }}</p>
                         </div>
                         <div class="feature-preview-arrow">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -67,32 +66,6 @@
                                 <polyline points="12 5 19 12 12 19" />
                             </svg>
                         </div>
-                    </div>
-
-                    <div class="brand-category-chips">
-                        <span class="brand-chip">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                            </svg>
-                            Maternal Care
-                        </span>
-                        <span class="brand-chip">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5">
-                                <circle cx="12" cy="8" r="5" />
-                                <path d="M20 21a8 8 0 1 0-16 0" />
-                            </svg>
-                            Growth Check
-                        </span>
-                        <span class="brand-chip">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5">
-                                <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
-                                <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z" />
-                            </svg>
-                            Nutrition
-                        </span>
                     </div>
                 </div>
             </div>
@@ -108,8 +81,8 @@
                             <line x1="15" y1="12" x2="3" y2="12" />
                         </svg>
                     </div>
-                    <h2>Member Sign In</h2>
-                    <p>Enter your credentials to access your dashboard.</p>
+                    <h2>{{ t('Sign In') }}</h2>
+                    <p>{{ t('Enter your credentials to access your dashboard.') }}</p>
                 </div>
 
                 <!-- Flash Alerts -->
@@ -118,7 +91,7 @@
                 <div class="flash-container">
                     {% for category, message in messages %}
                     <div class="alert alert-{{ category }}">
-                        <span>{{ message }}</span>
+                        <span>{{ t(message) }}</span>
                     </div>
                     {% endfor %}
                 </div>
@@ -152,25 +125,11 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-block" style="margin-top: 0.5rem;">Sign In</button>
+                    <button type="submit" class="btn btn-primary btn-block" style="margin-top: 0.5rem;">{{ t('Sign In') }}</button>
                 </form>
 
                 <div class="auth-footer">
-                    Don't have an account yet? <a href="{{ url_for('register') }}">Create an Account</a>
-                </div>
-
-                <div class="demo-credentials-note">
-                    <small>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            style="vertical-align: -2px;">
-                            <circle cx="12" cy="12" r="10" />
-                            <line x1="12" y1="16" x2="12" y2="12" />
-                            <line x1="12" y1="8" x2="12.01" y2="8" />
-                        </svg>
-                        <strong>Tip for Administrators:</strong> Use the secure development command
-                        <code>python create_admin.py</code> to configure an Admin account.
-                    </small>
+                    {{ t("Don't have an account?") }} <a href="{{ url_for('register') }}">{{ t('Register Now') }}</a>
                 </div>
             </div>
         </div>

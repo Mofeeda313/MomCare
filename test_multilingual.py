@@ -149,6 +149,8 @@ def test_persistence_across_navigation():
         with c.session_transaction() as sess:
             assert sess.get('user_language') == 'Malayalam', "Re-login did not restore Malayalam language preference"
         print("  Re-login automatically restores user language preference OK!")
+        # Clean up: restore English
+        c.get('/set-language/English', follow_redirects=True)
 
 # ---------------------------------------------------------------------------
 # Test 7 – Healthcare Worker and Admin Dashboards
@@ -164,6 +166,8 @@ def test_worker_and_admin_dashboards():
         html_w = r_w.data.decode('utf-8')
         assert 'ಆರೋಗ್ಯ ಕಾರ್ಯಕರ್ತೆ' in html_w or 'ಸ್ವಾಗತ' in html_w
         print("  Healthcare Worker dashboard renders in Kannada OK!")
+        # Restore English
+        c.get('/set-language/English', follow_redirects=True)
 
     # Admin in Hindi
     with app.test_client() as c:
@@ -174,6 +178,8 @@ def test_worker_and_admin_dashboards():
         html_a = r_a.data.decode('utf-8')
         assert 'प्रशासक' in html_a or 'व्यवस्थापक' in html_a or 'नियंत्रण कक्ष' in html_a
         print("  Admin dashboard renders in Hindi OK!")
+        # Restore English
+        c.get('/set-language/English', follow_redirects=True)
 
 # ---------------------------------------------------------------------------
 # Test 8 – Chatbot Multilingual Questions and Answers

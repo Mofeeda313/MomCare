@@ -56,7 +56,7 @@
         <div class="flash-container">
             {% for category, message in messages %}
             <div class="alert alert-{{ category }}">
-                <span>{{ message }}</span>
+                <span>{{ t(message) }}</span>
             </div>
             {% endfor %}
         </div>
@@ -92,7 +92,7 @@
                 </div>
                 <div class="profile-row">
                     <span class="profile-label">Primary Center:</span>
-                    <span class="profile-value">Community Health Subcenter</span>
+                    <span class="profile-value">{{ t('Community Health Subcenter') }}</span>
                 </div>
             </div>
         </section>
@@ -110,7 +110,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-number">{{ mothers|length }}</div>
-                        <div class="stat-title">Registered Mothers</div>
+                        <div class="stat-title">{{ t('Registered Mothers') }}</div>
                     </div>
                 </div>
                 <div class="stat-card-arrow">
@@ -128,7 +128,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-number">{{ vax_stats.total_children if vax_stats else 0 }}</div>
-                        <div class="stat-title">Community Children</div>
+                        <div class="stat-title">{{ t('Community Children') }}</div>
                     </div>
                 </div>
                 <div class="stat-card-arrow">
@@ -145,7 +145,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-number">{{ vax_stats.total_completed if vax_stats else 0 }}</div>
-                        <div class="stat-title">Doses Administered</div>
+                        <div class="stat-title">{{ t('Doses Administered') }}</div>
                     </div>
                 </div>
                 <div class="stat-card-arrow">
@@ -165,7 +165,7 @@
                     <div class="stat-info">
                         <div class="stat-number" style="color: #991B1B;">{{ (vax_stats.total_due +
                             vax_stats.total_overdue) if vax_stats else 0 }}</div>
-                        <div class="stat-title">Due &amp; Overdue Doses</div>
+                        <div class="stat-title">{{ t('Due & Overdue Doses') }}</div>
                     </div>
                 </div>
                 <div class="stat-card-arrow">
@@ -182,7 +182,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-number">{{ growth_stats.children_measured if growth_stats else 0 }} / {{ growth_stats.total_children if growth_stats else 0 }}</div>
-                        <div class="stat-title">Growth Monitored</div>
+                        <div class="stat-title">{{ t('Growth Monitored') }}</div>
                     </div>
                 </div>
                 <div class="stat-card-arrow">
@@ -205,19 +205,19 @@
             <form action="{{ url_for('worker_dashboard') }}" method="GET" class="search-filter-box">
                 <input type="text" name="q" value="{{ search_query or '' }}"
                     placeholder="Search child name, mother's name, or contact phone..." class="search-input-field">
-                <button type="submit" class="btn btn-primary btn-sm">Search Beneficiaries</button>
+                <button type="submit" class="btn btn-primary btn-sm">{{ t('Search') }}</button>
                 {% if search_query %}
-                <a href="{{ url_for('worker_dashboard') }}" class="btn btn-outline btn-sm">Clear Filter</a>
+                <a href="{{ url_for('worker_dashboard') }}" class="btn btn-outline btn-sm">{{ t('Clear Filter') }}</a>
                 {% endif %}
             </form>
 
             <!-- Continuous Vertical Menu Rows List -->
             <div class="vax-vertical-list">
                 <div class="vax-list-header" style="grid-template-columns: 2fr 1.6fr 1.5fr 1.3fr 1.2fr;">
-                    <div>Child Beneficiary</div>
-                    <div>Mother &amp; Contact</div>
-                    <div>NIS Progress &amp; Doses</div>
-                    <div>Next Due / Overdue</div>
+                    <div>{{ t('Child Beneficiary') }}</div>
+                    <div>{{ t('Mother & Contact') }}</div>
+                    <div>{{ t('NIS Progress & Doses') }}</div>
+                    <div>{{ t('Next Due / Overdue') }}</div>
                     <div style="text-align: right;">Clinical Action</div>
                 </div>
 
@@ -322,7 +322,7 @@
             <div class="vax-vertical-list">
                 <div class="vax-list-header">
                     <div>Child &amp; Age</div>
-                    <div>Mother &amp; Contact</div>
+                    <div>{{ t('Mother & Contact') }}</div>
                     <div>Latest Weight / Height</div>
                     <div>Status &amp; Follow-up</div>
                     <div style="text-align: right;">Action</div>
@@ -401,7 +401,7 @@
         <section class="table-section" id="registered-mothers-section">
             <div class="table-header-row">
                 <div>
-                    <h3>Registered Community Mothers</h3>
+                    <h3>{{ t('Registered Community Mothers') }}</h3>
                     <p class="table-sub">Live records loaded directly from the MomCare SQLite database.</p>
                 </div>
                 <button class="btn btn-primary btn-sm"

@@ -447,11 +447,18 @@
         /* ── Input Bar ───────────────────────────────────────────────────── */
         .chat-input-area {
             border-top: 1px solid var(--border-color);
-            padding: 0.9rem 1.1rem;
+            padding: 0.85rem 1.1rem;
             background: #FAFAF8;
             display: flex;
-            gap: 0.65rem;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 0.5rem;
             align-items: flex-end;
+            width: 100%;
         }
 
         .chat-input-wrap {
@@ -478,6 +485,165 @@
         #chat-input:focus { border-color: var(--forest-secondary); }
         #chat-input::placeholder { color: var(--text-muted); }
 
+        .chat-mic-btn {
+            width: 42px; height: 42px;
+            background: #FFFFFF;
+            color: var(--forest-primary);
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .chat-mic-btn:hover {
+            background: var(--sage-green);
+            border-color: var(--sage-border);
+            color: var(--forest-primary);
+        }
+
+        .chat-mic-btn.recording {
+            background: #FEE2E2;
+            border-color: #EF4444;
+            color: #DC2626;
+            animation: pulse-recording 1.4s infinite;
+        }
+
+        @keyframes pulse-recording {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+            70% { box-shadow: 0 0 0 9px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .voice-lang-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .voice-lang-select {
+            height: 42px;
+            padding: 0 0.5rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: #FFFFFF;
+            font-family: var(--font-body);
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--forest-primary);
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.15s;
+            max-width: 90px;
+        }
+
+        .voice-lang-select:focus { border-color: var(--forest-secondary); }
+
+        /* Voice Status Bar */
+        .voice-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            background: #FFF1F2;
+            border: 1px solid #FECDD3;
+            border-radius: var(--radius-md);
+            padding: 0.45rem 0.85rem;
+            font-size: 0.8rem;
+            color: #9F1239;
+            animation: voiceFadeIn 0.2s ease;
+        }
+
+        .voice-status-bar.info {
+            background: var(--sage-green-light);
+            border-color: var(--sage-border);
+            color: var(--forest-primary);
+        }
+
+        .voice-status-bar.error {
+            background: #FEF2F2;
+            border-color: #FCA5A5;
+            color: #B91C1C;
+        }
+
+        .voice-status-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .voice-pulse-circle {
+            width: 9px; height: 9px;
+            background: #E11D48;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+            animation: voiceBlink 0.9s infinite alternate;
+        }
+
+        @keyframes voiceBlink {
+            from { opacity: 0.3; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1.2); }
+        }
+
+        @keyframes voiceFadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .voice-active-lang {
+            font-weight: 700;
+            background: rgba(225, 29, 72, 0.12);
+            color: #BE123C;
+            padding: 0.15rem 0.45rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .voice-status-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .voice-stop-btn {
+            background: #E11D48;
+            color: #FFFFFF;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.25rem 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: background 0.15s;
+        }
+
+        .voice-stop-btn:hover { background: #BE123C; }
+
+        .voice-dismiss-btn {
+            background: none;
+            border: none;
+            color: #9F1239;
+            cursor: pointer;
+            padding: 0.2rem;
+            display: flex;
+            align-items: center;
+        }
+
         .chat-send-btn {
             width: 42px; height: 42px;
             background: var(--forest-primary);
@@ -503,6 +669,12 @@
         }
 
         .char-count.warn { color: #EF4444; }
+
+        @media (max-width: 500px) {
+            .voice-lang-select { max-width: 68px; padding: 0 0.25rem; font-size: 0.72rem; }
+            .chat-mic-btn, .chat-send-btn { width: 38px; height: 38px; }
+            .voice-status-bar { font-size: 0.75rem; padding: 0.35rem 0.65rem; }
+        }
     </style>
 </head>
 
@@ -570,22 +742,6 @@
                 <strong>{{ t('Health Notice:') }}</strong> {{ t('This chatbot provides general nutrition awareness and education only. It is not a substitute for medical advice. Always consult a qualified healthcare professional for clinical concerns, pregnancy complications, or questions about medications and supplements.') }}
             </span>
         </div>
-
-        {% if not gemini_configured %}
-        <div class="setup-notice" style="margin-bottom: 1rem;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <span>
-                <strong>Built-in Knowledge Base Active.</strong>
-                The Gemini AI API key is not configured. The chatbot is using a comprehensive built-in
-                nutrition knowledge base covering all major vitamins, minerals, and Indian dietary guidance.
-                To enable the full AI, set the <code>GEMINI_API_KEY</code> environment variable.
-            </span>
-        </div>
-        {% endif %}
 
         <div class="chatbot-layout">
             <!-- ── Sidebar ─────────────────────────────────────────── -->
@@ -754,15 +910,38 @@
                                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                                 </svg>
                             </div>
-                            <h3>Welcome, {{ user['full_name'].split()[0] }}!</h3>
+                            <h3>{{ t('Welcome,') }} {{ user['full_name'].split()[0] }}!</h3>
                             <p>{{ t('Ask me anything about nutrition, vitamins, minerals, or healthy eating for you and your child.') }}</p>
                             <div class="suggestion-chips">
-                                <button class="chip" onclick="useSuggestion('What foods are rich in iron?')">{{ t('Iron-rich foods') }}</button>
-                                <button class="chip" onclick="useSuggestion('What should I eat during pregnancy?')">{{ t('Pregnancy diet') }}</button>
-                                <button class="chip" onclick="useSuggestion('What are the symptoms of Vitamin D deficiency?')">{{ t('Vitamin D deficiency') }}</button>
-                                <button class="chip" onclick="useSuggestion('Which foods contain calcium?')">{{ t('Calcium sources') }}</button>
-                                <button class="chip" onclick="useSuggestion('What foods are good for my baby?')">{{ t('Baby foods') }}</button>
-                                <button class="chip" onclick="useSuggestion('Which foods are rich in folate?')">{{ t('Folate sources') }}</button>
+                                {% if current_lang == 'Malayalam' %}
+                                    <button class="chip" onclick="useSuggestion('ഇരുമ്പ് അടങ്ങിയ ഭക്ഷണങ്ങൾ ഏതൊക്കെയാണ്?')">{{ t('Iron-rich foods') }}</button>
+                                    <button class="chip" onclick="useSuggestion('ഗർഭകാലത്ത് എന്തൊക്കെ ഭക്ഷണങ്ങളാണ് കഴിക്കേണ്ടത്?')">{{ t('Pregnancy diet') }}</button>
+                                    <button class="chip" onclick="useSuggestion('വിറ്റാമിൻ ഡി കുറവിന്റെ ലക്ഷണങ്ങൾ എന്തൊക്കെയാണ്?')">{{ t('Vitamin D deficiency') }}</button>
+                                    <button class="chip" onclick="useSuggestion('കാൽസ്യം അടങ്ങിയ ഭക്ഷണങ്ങൾ ഏതൊക്കെയാണ്?')">{{ t('Calcium sources') }}</button>
+                                    <button class="chip" onclick="useSuggestion('കുഞ്ഞിന് അനുയോജ്യമായ ഭക്ഷണങ്ങൾ ഏതൊക്കെയാണ്?')">{{ t('Baby foods') }}</button>
+                                    <button class="chip" onclick="useSuggestion('ഫോളേറ്റ് അടങ്ങിയ ഭക്ഷണങ്ങൾ ഏതൊക്കെയാണ്?')">{{ t('Folate sources') }}</button>
+                                {% elif current_lang == 'Hindi' %}
+                                    <button class="chip" onclick="useSuggestion('आयरन से भरपूर खाद्य पदार्थ कौन से हैं?')">{{ t('Iron-rich foods') }}</button>
+                                    <button class="chip" onclick="useSuggestion('गर्भावस्था के दौरान क्या खाना चाहिए?')">{{ t('Pregnancy diet') }}</button>
+                                    <button class="chip" onclick="useSuggestion('विटामिन डी की कमी के क्या लक्षण हैं?')">{{ t('Vitamin D deficiency') }}</button>
+                                    <button class="chip" onclick="useSuggestion('कैल्शियम युक्त खाद्य पदार्थ कौन से हैं?')">{{ t('Calcium sources') }}</button>
+                                    <button class="chip" onclick="useSuggestion('शिशु के लिए कौन सा भोजन उपयुक्त है?')">{{ t('Baby foods') }}</button>
+                                    <button class="chip" onclick="useSuggestion('फ़ोलेट से भरपूर खाद्य पदार्थ कौन से हैं?')">{{ t('Folate sources') }}</button>
+                                {% elif current_lang == 'Kannada' %}
+                                    <button class="chip" onclick="useSuggestion('ಕಬ್ಬಿಣಾಂಶವಿರುವ ಆಹಾರಗಳು ಯಾವುವು?')">{{ t('Iron-rich foods') }}</button>
+                                    <button class="chip" onclick="useSuggestion('ಗರ್ಭಾವಸ್ಥೆಯಲ್ಲಿ ಏನು ತಿನ್ನಬೇಕು?')">{{ t('Pregnancy diet') }}</button>
+                                    <button class="chip" onclick="useSuggestion('ವಿಟಮಿನ್ ಡಿ ಕೊರತೆಯ ಲಕ್ಷಣಗಳು ಯಾವುವು?')">{{ t('Vitamin D deficiency') }}</button>
+                                    <button class="chip" onclick="useSuggestion('ಕ್ಯಾಲ್ಸಿಯಂ ಹೊಂದಿರುವ ಆಹಾರಗಳು ಯಾವುವು?')">{{ t('Calcium sources') }}</button>
+                                    <button class="chip" onclick="useSuggestion('ಮಗುವಿಗೆ ಯಾವ ಆಹಾರಗಳು ಸೂಕ್ತ?')">{{ t('Baby foods') }}</button>
+                                    <button class="chip" onclick="useSuggestion('ಫೋಲೇಟ್ ಸಮೃದ್ಧವಾಗಿರುವ ಆಹಾರಗಳು ಯಾವುವು?')">{{ t('Folate sources') }}</button>
+                                {% else %}
+                                    <button class="chip" onclick="useSuggestion('What foods are rich in iron?')">{{ t('Iron-rich foods') }}</button>
+                                    <button class="chip" onclick="useSuggestion('What should I eat during pregnancy?')">{{ t('Pregnancy diet') }}</button>
+                                    <button class="chip" onclick="useSuggestion('What are the symptoms of Vitamin D deficiency?')">{{ t('Vitamin D deficiency') }}</button>
+                                    <button class="chip" onclick="useSuggestion('Which foods contain calcium?')">{{ t('Calcium sources') }}</button>
+                                    <button class="chip" onclick="useSuggestion('What foods are good for my baby?')">{{ t('Baby foods') }}</button>
+                                    <button class="chip" onclick="useSuggestion('Which foods are rich in folate?')">{{ t('Folate sources') }}</button>
+                                {% endif %}
                             </div>
                         </div>
                         {% endif %}
@@ -770,23 +949,65 @@
 
                     <!-- Input bar -->
                     <div class="chat-input-area">
-                        <div class="chat-input-wrap">
-                            <textarea
-                                id="chat-input"
-                                rows="1"
-                                maxlength="1000"
-                                placeholder="{{ t('Type your question about nutrition...') }}"
-                                autocomplete="off"
-                            ></textarea>
-                            <div class="char-count" id="char-count">0 / 1000</div>
+                        <!-- Voice recognition status indicator -->
+                        <div id="voice-status-bar" class="voice-status-bar" style="display: none;">
+                            <div class="voice-status-info">
+                                <span class="voice-pulse-circle" id="voice-pulse-circle"></span>
+                                <span id="voice-status-text">{{ t('Listening... Speak now') }}</span>
+                                <span class="voice-active-lang" id="voice-active-lang">English</span>
+                            </div>
+                            <div class="voice-status-actions">
+                                <button type="button" class="voice-stop-btn" id="voice-stop-btn" onclick="stopVoiceInput()">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                                    {{ t('Stop') }}
+                                </button>
+                                <button type="button" class="voice-dismiss-btn" id="voice-dismiss-btn" onclick="hideVoiceStatus()" aria-label="Dismiss">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </div>
                         </div>
-                        <button class="chat-send-btn" id="send-btn" onclick="sendMessage()" aria-label="Send message">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="22" y1="2" x2="11" y2="13" />
-                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                            </svg>
-                        </button>
+
+                        <div class="chat-input-row">
+                            <div class="chat-input-wrap">
+                                <textarea
+                                    id="chat-input"
+                                    rows="1"
+                                    maxlength="1000"
+                                    placeholder="{{ t('Type your question or click the microphone to speak...') }}"
+                                    autocomplete="off"
+                                ></textarea>
+                                <div class="char-count" id="char-count">0 / 1000</div>
+                            </div>
+
+                            <!-- Voice Language Quick Selector -->
+                            <div class="voice-lang-wrap" title="{{ t('Voice Language') }}">
+                                <select id="voice-lang-select" class="voice-lang-select" onchange="onVoiceLangChange(this.value)" aria-label="{{ t('Voice Language') }}">
+                                    <option value="English">EN</option>
+                                    <option value="Malayalam">മലയാളം</option>
+                                    <option value="Hindi">हिन्दी</option>
+                                    <option value="Kannada">ಕನ್ನಡ</option>
+                                </select>
+                            </div>
+
+                            <!-- Microphone Voice Input Button -->
+                            <button type="button" class="chat-mic-btn" id="mic-btn" onclick="toggleVoiceInput()" aria-label="{{ t('Voice Input') }}" title="{{ t('Click to speak') }}">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                                    <line x1="12" y1="19" x2="12" y2="22"/>
+                                </svg>
+                            </button>
+
+                            <!-- Send Message Button -->
+                            <button class="chat-send-btn" id="send-btn" onclick="sendMessage()" aria-label="Send message">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13" />
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <!-- End chat window -->
@@ -914,12 +1135,228 @@
             if (typingRow) { typingRow.remove(); typingRow = null; }
         }
 
+        // ── Multilingual Speech Recognition (Voice Input) ─────────────────
+        const VOICE_LANG_MAP = {
+            'English':   'en-IN',
+            'Malayalam': 'ml-IN',
+            'Hindi':     'hi-IN',
+            'Kannada':   'kn-IN'
+        };
+
+        const VOICE_LANG_DISPLAY = {
+            'English':   'English (EN)',
+            'Malayalam': 'മലയാളം (ML)',
+            'Hindi':     'हिन्दी (HI)',
+            'Kannada':   'ಕನ್ನಡ (KN)'
+        };
+
+        let recognition = null;
+        let isRecording = false;
+        let speechBaseText = '';
+        let voiceStatusTimeout = null;
+
+        function getActiveVoiceLang() {
+            const sel = document.getElementById('voice-lang-select');
+            if (sel && sel.value) return sel.value;
+            if (currentLanguage && VOICE_LANG_MAP[currentLanguage]) return currentLanguage;
+            return 'English';
+        }
+
+        function showVoiceStatus(type, msg, showStop = false) {
+            clearTimeout(voiceStatusTimeout);
+            const bar = document.getElementById('voice-status-bar');
+            const txt = document.getElementById('voice-status-text');
+            const pulse = document.getElementById('voice-pulse-circle');
+            const badge = document.getElementById('voice-active-lang');
+            const stopBtn = document.getElementById('voice-stop-btn');
+            const dismissBtn = document.getElementById('voice-dismiss-btn');
+
+            if (!bar) return;
+
+            bar.className = 'voice-status-bar ' + (type || '');
+            bar.style.display = 'flex';
+            if (txt) txt.textContent = msg;
+
+            const curLang = getActiveVoiceLang();
+            if (badge) badge.textContent = curLang;
+
+            if (pulse) pulse.style.display = (type === 'recording') ? 'inline-block' : 'none';
+            if (stopBtn) stopBtn.style.display = showStop ? 'inline-flex' : 'none';
+            if (dismissBtn) dismissBtn.style.display = !showStop ? 'inline-flex' : 'none';
+
+            if (type !== 'recording') {
+                voiceStatusTimeout = setTimeout(() => {
+                    hideVoiceStatus();
+                }, 4500);
+            }
+        }
+
+        function hideVoiceStatus() {
+            clearTimeout(voiceStatusTimeout);
+            const bar = document.getElementById('voice-status-bar');
+            if (bar) bar.style.display = 'none';
+        }
+
+        function onVoiceLangChange(lang) {
+            const badge = document.getElementById('voice-active-lang');
+            if (badge) badge.textContent = lang;
+
+            if (isRecording) {
+                stopVoiceInput();
+                setTimeout(() => {
+                    startVoiceInput();
+                }, 250);
+            }
+        }
+
+        function toggleVoiceInput() {
+            if (isRecording) {
+                stopVoiceInput();
+            } else {
+                startVoiceInput();
+            }
+        }
+
+        function startVoiceInput() {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) {
+                showVoiceStatus('error', {{ t('Speech recognition is not supported in this browser. Please try Chrome or Edge.') | tojson }});
+                return;
+            }
+
+            const input = document.getElementById('chat-input');
+            speechBaseText = input.value.trim();
+            if (speechBaseText) {
+                speechBaseText += ' ';
+            }
+
+            try {
+                if (recognition) {
+                    try { recognition.abort(); } catch(e) {}
+                }
+
+                recognition = new SpeechRec();
+                const selectedLang = getActiveVoiceLang();
+                recognition.lang = VOICE_LANG_MAP[selectedLang] || 'en-IN';
+                recognition.interimResults = true;
+                recognition.maxAlternatives = 1;
+                recognition.continuous = true;
+
+                recognition.onstart = () => {
+                    isRecording = true;
+                    const micBtn = document.getElementById('mic-btn');
+                    if (micBtn) {
+                        micBtn.classList.add('recording');
+                        micBtn.setAttribute('title', {{ t('Click to stop recording') | tojson }});
+                    }
+                    const langLabel = VOICE_LANG_DISPLAY[selectedLang] || selectedLang;
+                    showVoiceStatus('recording', `{{ t('Listening in') }} ${langLabel}... {{ t('Speak now') }}`, true);
+                };
+
+                recognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    let finalTranscript = '';
+
+                    for (let i = 0; i < event.results.length; ++i) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+
+                    const input = document.getElementById('chat-input');
+                    const currentSpeech = (finalTranscript || interimTranscript).trim();
+                    input.value = speechBaseText + currentSpeech;
+                    updateCharCount();
+
+                    input.style.height = 'auto';
+                    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+                };
+
+                recognition.onerror = (event) => {
+                    let errorMsg = {{ t('Speech recognition error occurred.') | tojson }};
+                    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                        errorMsg = {{ t('Microphone access denied. Please allow microphone permissions in your browser.') | tojson }};
+                    } else if (event.error === 'no-speech') {
+                        errorMsg = {{ t('No speech detected. Please speak closer to your microphone.') | tojson }};
+                    } else if (event.error === 'network') {
+                        errorMsg = {{ t('Network error during speech recognition. Please check your connection.') | tojson }};
+                    } else if (event.error === 'audio-capture') {
+                        errorMsg = {{ t('No microphone found or audio capture failed.') | tojson }};
+                    }
+
+                    showVoiceStatus('error', errorMsg);
+                    cleanupVoiceRecording();
+                };
+
+                recognition.onend = () => {
+                    cleanupVoiceRecording();
+                    const input = document.getElementById('chat-input');
+                    if (input && input.value.trim()) {
+                        showVoiceStatus('info', {{ t('Recording stopped. Review your message and click send.') | tojson }});
+                        input.focus();
+                    } else {
+                        hideVoiceStatus();
+                    }
+                };
+
+                recognition.start();
+            } catch (err) {
+                showVoiceStatus('error', {{ t('Unable to start speech recognition: ') | tojson }} + err.message);
+                cleanupVoiceRecording();
+            }
+        }
+
+        function stopVoiceInput() {
+            if (recognition) {
+                try {
+                    recognition.stop();
+                } catch(e) {}
+            }
+            cleanupVoiceRecording();
+        }
+
+        function cleanupVoiceRecording() {
+            isRecording = false;
+            const micBtn = document.getElementById('mic-btn');
+            if (micBtn) {
+                micBtn.classList.remove('recording');
+                micBtn.setAttribute('title', {{ t('Click to speak') | tojson }});
+            }
+        }
+
+        // ── Localized Chatbot Strings ─────────────────────────────────────
+        const chatbot_strings = {
+            error_processing: {{ t('Sorry, I could not process your question. Please try again.') | tojson }},
+            error_network: {{ t('A network error occurred. Please check your connection and try again.') | tojson }}
+        };
+
         // ── Send message ───────────────────────────────────────────────────
         async function sendMessage() {
             if (isLoading) return;
+            if (isRecording) {
+                stopVoiceInput();
+            }
+            hideVoiceStatus();
+
             const input = document.getElementById('chat-input');
             const question = input.value.trim();
             if (!question) return;
+
+            // Detect script of question to ensure response is in the same language and script
+            let detectedScript = null;
+            for (let ch of question) {
+                const code = ch.charCodeAt(0);
+                if (code >= 0x0D00 && code <= 0x0D7F) { detectedScript = 'Malayalam'; break; }
+                if (code >= 0x0900 && code <= 0x097F) { detectedScript = 'Hindi'; break; }
+                if (code >= 0x0C80 && code <= 0x0CFF) { detectedScript = 'Kannada'; break; }
+            }
+
+            const activeVoiceSelect = document.getElementById('voice-lang-select');
+            const chosenVoiceLang = activeVoiceSelect ? activeVoiceSelect.value : null;
+            const languageToSend = detectedScript || chosenVoiceLang || currentLanguage;
 
             isLoading = true;
             document.getElementById('send-btn').disabled = true;
@@ -936,7 +1373,7 @@
                     body: JSON.stringify({
                         question,
                         context:    currentContext,
-                        language:   currentLanguage,
+                        language:   languageToSend,
                         child_id:   currentChildId,
                         session_id: currentSessionId
                     })
@@ -947,13 +1384,21 @@
 
                 if (resp.ok) {
                     currentSessionId = data.session_id;
+                    if (data.language) {
+                        currentLanguage = data.language;
+                        const langDisp = document.getElementById('lang-display');
+                        if (langDisp) langDisp.textContent = currentLanguage;
+                        if (activeVoiceSelect && activeVoiceSelect.value !== currentLanguage) {
+                            activeVoiceSelect.value = currentLanguage;
+                        }
+                    }
                     appendBubble('assistant', data.response);
                 } else {
-                    appendBubble('assistant', 'Sorry, I could not process your question. Please try again.');
+                    appendBubble('assistant', chatbot_strings.error_processing);
                 }
             } catch (err) {
                 hideTyping();
-                appendBubble('assistant', 'A network error occurred. Please check your connection and try again.');
+                appendBubble('assistant', chatbot_strings.error_network);
             }
 
             isLoading = false;
@@ -984,7 +1429,7 @@
 
         function setChild(id) {
             currentChildId = id;
-            if (id !== null) { setContext('Child Nutrition', t('Child Nutrition')); }
+            if (id !== null) { setContext('Child Nutrition'); }
             document.querySelectorAll('.child-row').forEach(b => {
                 const bid = b.getAttribute('onclick').match(/setChild\((\d+|null)\)/);
                 if (bid) {
@@ -1003,9 +1448,24 @@
             cc.classList.toggle('warn', len > 900);
         }
 
-        // ── Auto-resize textarea ────────────────────────────────────────────
+        // ── Auto-resize textarea & Initialize Voice Settings ─────────────────
         document.addEventListener('DOMContentLoaded', () => {
             const inp = document.getElementById('chat-input');
+
+            // Initialize voice language selector to current user language
+            const voiceSel = document.getElementById('voice-lang-select');
+            if (voiceSel && currentLanguage) {
+                if (['English', 'Malayalam', 'Hindi', 'Kannada'].includes(currentLanguage)) {
+                    voiceSel.value = currentLanguage;
+                }
+            }
+
+            // Check if SpeechRecognition is supported; if not, update mic button tooltip
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const micBtn = document.getElementById('mic-btn');
+            if (!SpeechRec && micBtn) {
+                micBtn.setAttribute('title', {{ t('Voice input is not supported in this browser. Please use Chrome or Edge.') | tojson }});
+            }
 
             inp.addEventListener('input', () => {
                 inp.style.height = 'auto';

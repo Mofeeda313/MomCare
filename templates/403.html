@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_lang }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>403 - Access Denied | MomCare</title>
+    <title>{{ t('403 - Access Denied') }} | MomCare</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,11 +29,12 @@
                 </a>
             </div>
             <div class="nav-actions">
+                {% include '_language_picker.html' %}
                 {% if session.get('user_id') %}
-                <a href="{{ url_for('dashboard_router') }}" class="btn btn-outline btn-sm">My Dashboard</a>
-                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+                <a href="{{ url_for('dashboard_router') }}" class="btn btn-outline btn-sm">{{ t('My Dashboard') }}</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">{{ t('Sign Out') }}</a>
                 {% else %}
-                <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">Sign In</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">{{ t('Sign In') }}</a>
                 {% endif %}
             </div>
         </div>
@@ -48,19 +49,19 @@
                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
             </div>
-            <h2>403 - Access Denied</h2>
+            <h2>{{ t('403 - Access Denied') }}</h2>
             <p>
-                You do not have the required permissions to view this maternal healthcare portal area.
+                {{ t('You do not have the required permissions to view this maternal healthcare portal area.') }}
             </p>
 
             <div class="error-details-box">
                 <div class="error-details-row">
-                    <span class="profile-label">Current User:</span>
+                    <span class="profile-label">{{ t('Current User:') }}</span>
                     <span class="profile-value"><strong>{{ user_name or session.get('user_name', 'Guest')
                             }}</strong></span>
                 </div>
                 <div class="error-details-row">
-                    <span class="profile-label">Your Active Role:</span>
+                    <span class="profile-label">{{ t('Your Assigned Role:') }}</span>
                     <span>
                         {% set role = user_role or session.get('user_role') %}
                         {% if role == 'Mother' %}
@@ -69,7 +70,7 @@
                                 <path
                                     d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                             </svg>
-                            Mother
+                            {{ t('Mother') }}
                         </span>
                         {% elif role == 'Healthcare Worker' %}
                         <span class="role-pill role-pill-worker">
@@ -78,7 +79,7 @@
                                 <path
                                     d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
                             </svg>
-                            Healthcare Worker
+                            {{ t('Healthcare Worker') }}
                         </span>
                         {% elif role == 'Admin' %}
                         <span class="role-pill role-pill-admin">
@@ -86,7 +87,7 @@
                                 stroke-width="2.5">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                             </svg>
-                            Admin
+                            {{ t('Admin') }}
                         </span>
                         {% else %}
                         <span class="badge badge-light">{{ role or 'Unauthenticated' }}</span>
@@ -94,29 +95,23 @@
                     </span>
                 </div>
                 <div class="error-details-row">
-                    <span class="profile-label">Required Role:</span>
+                    <span class="profile-label">{{ t('Required Permission:') }}</span>
                     <span style="color: var(--danger-text); font-weight: 700;">{{ required_roles or 'Elevated Privilege'
                         }}</span>
                 </div>
             </div>
 
-            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.6;">
-                This section of MomCare is strictly restricted to <strong>{{ required_roles or 'authorized accounts'
-                    }}</strong>.
-                If you believe this is in error, please contact your community healthcare administrator.
-            </p>
-
             <div class="error-actions">
-                <a href="{{ url_for('dashboard_router') }}" class="btn btn-primary">Return to My Dashboard</a>
-                <a href="{{ url_for('home') }}" class="btn btn-outline">Go to Homepage</a>
+                <a href="{{ url_for('dashboard_router') }}" class="btn btn-primary">{{ t('Return to My Dashboard') }}</a>
+                <a href="{{ url_for('home') }}" class="btn btn-outline">{{ t('Home') }}</a>
             </div>
         </div>
     </main>
 
     <footer class="footer">
         <div class="container footer-content">
-            <p>&copy; 2026 MomCare. Secure Role-Based Authorization.</p>
-            <p class="footer-note">Compassionate care for every mother and child.</p>
+            <p>&copy; 2026 MomCare. {{ t('Transforming Maternal & Child Healthcare.') }}</p>
+            <p class="footer-note">{{ t('Compassionate care for every mother and child.') }}</p>
         </div>
     </footer>
 </body>

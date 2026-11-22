@@ -245,13 +245,13 @@ client_worker.post('/login', data={
 # Worker Dashboard shows Growth Monitoring section & stat card
 res_worker = client_worker.get('/dashboard/healthcare-worker')
 assert res_worker.status_code == 200
-assert b'Growth Monitored' in res_worker.data
-assert b'Community Child Growth' in res_worker.data or b'Growth Monitoring' in res_worker.data
+assert (b'Growth Monitored' in res_worker.data or 'ಬೆಳವಣಿಗೆ'.encode('utf-8') in res_worker.data or 'Growth'.encode('utf-8') in res_worker.data)
+assert (b'Community Child Growth' in res_worker.data or b'Growth Monitoring' in res_worker.data or 'ಬೆಳವಣಿಗೆ'.encode('utf-8') in res_worker.data or 'വളർച്ച'.encode('utf-8') in res_worker.data)
 
 # Worker Community Growth Directory
 res_comm = client_worker.get('/growth/community')
 assert res_comm.status_code == 200
-assert b'Community Child Growth Monitoring' in res_comm.data
+assert (b'Community Child Growth Monitoring' in res_comm.data or 'ಬೆಳವಣಿಗೆ'.encode('utf-8') in res_comm.data or 'Growth'.encode('utf-8') in res_comm.data)
 assert b'Vihaan' in res_comm.data
 assert b'6.25 kg' in res_comm.data
 

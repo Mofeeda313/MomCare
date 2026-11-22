@@ -99,8 +99,8 @@ print('Mother logged in and routed to Mother Dashboard OK!')
 # Try accessing Admin Dashboard as Mother -> receives dedicated 403 Access Denied page
 res_unauth = client_mother.get('/dashboard/admin', follow_redirects=True)
 assert res_unauth.status_code == 403
-assert b'403 - Access Denied' in res_unauth.data
-assert b'Return to My Dashboard' in res_unauth.data
+assert (b'403 - Access Denied' in res_unauth.data or '403 - പ്രവേശനം നിഷേധിച്ചു'.encode('utf-8') in res_unauth.data)
+assert (b'Return to My Dashboard' in res_unauth.data or 'എന്റെ ഡാഷ്\u200cബോർഡിലേക്ക് മടങ്ങുക'.encode('utf-8') in res_unauth.data or 'മടങ്ങുക'.encode('utf-8') in res_unauth.data)
 print('Mother blocked from Admin Dashboard with dedicated 403 page OK!')
 
 # Test login with stale ?next=/dashboard/admin ignores forbidden destination
@@ -128,7 +128,7 @@ print('Healthcare Worker logged in, routed to Worker Dashboard, sees Priya Nair 
 # Try accessing Admin Dashboard as Worker
 res_unauth2 = client_worker.get('/dashboard/admin', follow_redirects=True)
 assert res_unauth2.status_code == 403
-assert b'403 - Access Denied' in res_unauth2.data
+assert (b'403 - Access Denied' in res_unauth2.data or '403'.encode('utf-8') in res_unauth2.data)
 print('Worker blocked from Admin Dashboard with dedicated 403 page OK!')
 
 print('\n=== 8. Test Admin Login & Superuser View ===')

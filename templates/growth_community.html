@@ -36,10 +36,10 @@
                         <path
                             d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
                     </svg>
-                    Healthcare Provider
+                    {{ t('Healthcare Provider') }}
                 </span>
-                <a href="{{ url_for('worker_dashboard') }}" class="btn btn-outline btn-sm">Provider Dashboard</a>
-                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+                <a href="{{ url_for('worker_dashboard') }}" class="btn btn-outline btn-sm">{{ t('Provider Dashboard') }}</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">{{ t('Sign Out') }}</a>
             </div>
         </div>
     </header>
@@ -51,7 +51,7 @@
         <div class="flash-container">
             {% for category, message in messages %}
             <div class="alert alert-{{ category }}">
-                <span>{{ message }}</span>
+                <span>{{ t(message) }}</span>
             </div>
             {% endfor %}
         </div>
@@ -66,18 +66,18 @@
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                     </svg>
-                    Community Pediatric Care
+                    {{ t('Community Pediatric Care') }}
                 </div>
-                <h1>Community Child Growth Monitoring</h1>
+                <h1>{{ t('Community Child Growth Monitoring') }}</h1>
                 <p>Track anthropometric development, identify growth faltering, evaluate WHO reference percentiles, and coordinate nutritional interventions.</p>
             </div>
             <div class="banner-profile-card">
                 <div class="profile-row">
-                    <span class="profile-label">Total Children:</span>
+                    <span class="profile-label">{{ t('Total Children:') }}</span>
                     <span class="profile-value">{{ growth_stats.total_children }}</span>
                 </div>
                 <div class="profile-row">
-                    <span class="profile-label">Children Measured:</span>
+                    <span class="profile-label">{{ t('Children Measured:') }}</span>
                     <span class="profile-value">{{ growth_stats.children_measured }}</span>
                 </div>
                 <div class="profile-row">
@@ -114,14 +114,14 @@
         <!-- Search and Filter Bar -->
         <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <form action="{{ url_for('community_growth_directory') }}" method="GET" style="display: flex; gap: 0.5rem; flex: 1; max-width: 450px;">
-                <input type="text" name="q" value="{{ search_query }}" placeholder="Search child, mother name, or phone..."
+                <input type="text" name="q" value="{{ search_query }}" placeholder="{{ t('Search child, mother name, or phone...') }}"
                     style="flex: 1; padding: 0.55rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-family: inherit; font-size: 0.875rem;">
                 {% if filter_tab != 'all' %}
                 <input type="hidden" name="filter" value="{{ filter_tab }}">
                 {% endif %}
-                <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                <button type="submit" class="btn btn-primary btn-sm">{{ t('Search') }}</button>
                 {% if search_query %}
-                <a href="{{ url_for('community_growth_directory', filter=filter_tab) }}" class="btn btn-outline btn-sm">Clear</a>
+                <a href="{{ url_for('community_growth_directory', filter=filter_tab) }}" class="btn btn-outline btn-sm">{{ t('Clear Filter') }}</a>
                 {% endif %}
             </form>
 
@@ -129,7 +129,7 @@
             <div class="vax-filter-nav" style="margin: 0;">
                 <a href="{{ url_for('community_growth_directory', filter='all', q=search_query) }}"
                     class="vax-filter-pill {{ 'active' if filter_tab == 'all' else '' }}">
-                    All Children ({{ all_children|length }})
+                    {{ t('View All Children') }} ({{ all_children|length }})
                 </a>
                 <a href="{{ url_for('community_growth_directory', filter='followup', q=search_query) }}"
                     class="vax-filter-pill {{ 'active' if filter_tab == 'followup' else '' }}">

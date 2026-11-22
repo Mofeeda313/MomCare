@@ -864,6 +864,116 @@ DISCLAIMERS = {
 }
 
 # =============================================================================
+# Multilingual Vaccination Guidance
+# =============================================================================
+
+VACCINATION_GUIDANCE = {
+    "English": (
+        "## National Immunization Schedule (NIS) & Child Vaccination Guidance\n\n"
+        "Timely vaccination protects your child from serious, preventable diseases:\n"
+        "• **At Birth:** BCG (tuberculosis protection), OPV-0 (oral polio drop), and Hepatitis B birth dose (within 24 hours).\n"
+        "• **At 6 Weeks, 10 Weeks, and 14 Weeks:** Pentavalent (DPT + Hep B + Hib), OPV (Oral Polio), Rotavirus vaccine (protection against severe diarrhoea), and Fractional IPV (inactivated polio injection) / PCV (pneumococcal).\n"
+        "• **At 9 to 12 Months:** MR-1 (Measles and Rubella), JE-1 (where applicable), and Vitamin A 1st dose (100,000 IU).\n"
+        "• **At 16 to 24 Months:** MR-2, DPT Booster-1, OPV Booster, and Vitamin A 2nd dose (200,000 IU).\n"
+        "• **At 5 to 6 Years:** DPT Booster-2.\n"
+        "• **At 10 & 16 Years:** Td (Tetanus & adult Diphtheria).\n\n"
+        "**Key Reminders:**\n"
+        "• All vaccines under the Universal Immunization Programme (UIP) are provided **free of cost** at Government Primary Health Centres (PHC), Subcentres, and Anganwadi sessions.\n"
+        "• Always carry your **Mother & Child Protection (MCP) card** to every vaccination session.\n"
+        "• Mild fever or swelling at the injection site is normal. Consult your doctor or healthcare worker if high fever or persistent crying occurs."
+    ),
+    "Malayalam": (
+        "## ദേശീയ പ്രതിരോധ കുത്തിവയ്പ്പ് പദ്ധതിയും (NIS) ശിശു വാക്സിനേഷൻ വിവരങ്ങളും\n\n"
+        "മാരകരോഗങ്ങളിൽ നിന്ന് കുഞ്ഞിനെ സംരക്ഷിക്കാൻ സമയബന്ധിതമായ പ്രതിരോധ കുത്തിവയ്പ്പുകൾ അത്യന്താപേക്ഷിതമാണ്:\n"
+        "• **ജനന സമയത്ത്:** ബിസിജി (BCG - ക്ഷയരോഗത്തിനെതിരെ), ഒപിവി-0 (OPV - പോളിയോ തുള്ളിമരുന്ന്), ഹെപ്പറ്റൈറ്റിസ് ബി (24 മണിക്കൂറിനുള്ളിൽ).\n"
+        "• **6, 10, 14 ആഴ്ചകളിൽ:** പെന്റാവാലന്റ് (Pentavalent - ഡിപിടി, ഹെപ്പറ്റൈറ്റിസ് ബി, ഹിബ്ബ്), ഒപിവി (പോളിയോ), റോട്ടാവൈറസ് (വയറിളക്കത്തിനെതിരെ), ഫ്രാക്ഷണൽ ഐപിവി (fIPV).\n"
+        "• **9 മുതൽ 12 മാസം വരെ:** എംആർ 1 (MR - മീസിൽസ് & റുബെല്ല), വിറ്റാമിൻ എ ആദ്യ ഡോസ്, ജെഇ (ആവശ്യമുള്ള പ്രദേശങ്ങളിൽ).\n"
+        "• **16 മുതൽ 24 മാസം വരെ:** എംആർ 2, ഡിപിടി ബൂസ്റ്റർ 1, പോളിയോ ബൂസ്റ്റർ, വിറ്റാമിൻ എ ഡോസുകൾ.\n"
+        "• **5 മുതൽ 6 വയസ്സ് വരെ:** ഡിപിടി ബൂസ്റ്റർ 2.\n"
+        "• **10, 16 വയസ്സുകളിൽ:** ടിഡി (Td - ടെറ്റനസ് & ഡിഫ്തീരിയ).\n\n"
+        "**പ്രധാന വിവരങ്ങൾ:**\n"
+        "• സർക്കാർ പ്രൈമറി ഹെൽത്ത് സെന്ററുകളിലും (PHC) ഉപകേന്ദ്രങ്ങളിലും ഈ വാക്സിനുകൾ **സൗജന്യമായി** ലഭ്യമാണ്.\n"
+        "• കുത്തിവയ്പ്പിന് പോകുമ്പോൾ **മാതൃ-ശിശു സംരക്ഷണ കാർഡ് (MCP Card)** കൈയിൽ കരുതുക.\n"
+        "• കുത്തിവയ്പ്പിന് ശേഷം ചെറിയ പനിയോ വേദനയോ സാധാരണമാണ്; അസ്വസ്ഥതകൾ കൂടിയാൽ ആരോഗ്യ പ്രവർത്തകരുടെ സഹായം തേടുക."
+    ),
+    "Hindi": (
+        "## राष्ट्रीय टीकाकरण कार्यक्रम (NIS) एवं बाल टीकाकरण मार्गदर्शन\n\n"
+        "समय पर टीकाकरण आपके बच्चे को जानलेवा बीमारियों से सुरक्षित रखता है:\n"
+        "• **जन्म के समय:** बीसीजी (BCG - टीबी से बचाव), ओपीवी-0 (OPV - पोलियो ड्रॉप्स), और हेपेटाइटिस बी (24 घंटे के भीतर)।\n"
+        "• **6, 10 और 14 सप्ताह में:** पेंटावेलेंट (गलाघोंटू, काली खांसी, टिटनेस, हेपेटाइटिस बी, हिब), ओपीवी (पोलियो), रोटावायरस (दस्त से बचाव), और एफआईपीवी (fIPV)।\n"
+        "• **9 से 12 महीने में:** एमआर-1 (खसरा और रूबेला), विटामिन ए की पहली खुराक, जेई (आवश्यकतानुसार)।\n"
+        "• **16 से 24 महीने में:** एमआर-2, डीपीटी बूस्टर-1, ओपीवी बूस्टर, और विटामिन ए खुराक।\n"
+        "• **5 से 6 वर्ष में:** डीपीटी बूस्टर-2।\n"
+        "• **10 और 16 वर्ष में:** टीडी (टिटनेस और डिप्थीरिया)।\n\n"
+        "**महत्वपूर्ण बातें:**\n"
+        "• सार्वभौमिक टीकाकरण कार्यक्रम के तहत सभी टीके सरकारी प्राथमिक स्वास्थ्य केंद्रों और उपकेंद्रों पर **निःशुल्क** उपलब्ध हैं।\n"
+        "• टीकाकरण के समय **मातृ-शिशु सुरक्षा (MCP) कार्ड** साथ ले जाना न भूलें।\n"
+        "• टीके के बाद हल्का बुखार या दर्द सामान्य है; अधिक समस्या होने पर तुरंत आशा/स्वास्थ्य कार्यकर्ता से संपर्क करें।"
+    ),
+    "Kannada": (
+        "## ರಾಷ್ಟ್ರೀಯ ಲಸಿಕಾ ವೇಳಾಪಟ್ಟಿ (NIS) ಮತ್ತು ಶಿಶು ಲಸಿಕಾ ಮಾರ್ಗದರ್ಶನ\n\n"
+        "ಸಕಾಲಿಕ ಲಸಿಕೀಕರಣವು ಮಾರಕ ರೋಗಗಳಿಂದ ಮಗುವನ್ನು ರಕ್ಷಿಸುತ್ತದೆ:\n"
+        "• **ಹುಟ್ಟಿದ ತಕ್ಷಣ:** ಬಿಸಿಜಿ (ಕ್ಷಯರೋಗ ತಡೆಗೆ), ಒಪಿವಿ-0 (ಪೋಲಿಯೋ ಹನಿಗಳು), ಮತ್ತು ಹೆಪಟೈಟಿಸ್ ಬಿ (24 ಗಂಟೆಗಳೊಳಗೆ).\n"
+        "• **6, 10 ಮತ್ತು 14 ವಾರಗಳಲ್ಲಿ:** ಪೆಂಟಾವಲೆಂಟ್ (ಡಿಪಿಟಿ, ಹೆಪಟೈಟಿಸ್ ಬಿ, ಹಿಬ್), ಒಪಿವಿ (ಪೋಲಿಯೋ), ರೋಟಾವೈರಸ್ (ಭೇದಿ ತಡೆಗೆ), ಮತ್ತು ಎಫ್‌ಐಪಿವಿ (fIPV).\n"
+        "• **9 ರಿಂದ 12 ತಿಂಗಳು:** ಎಂಆರ್-1 (ದಡಾರ ಮತ್ತು ರುಬೆಲ್ಲಾ), ವಿಟಮಿನ್ ಎ ಮೊದಲ ಡೋಸ್.\n"
+        "• **16 ರಿಂದ 24 ತಿಂಗಳು:** ಎಂಆರ್-2, ಡಿಪಿಟಿ ಬೂಸ್ಟರ್-1, ಒಪಿವಿ ಬೂಸ್ಟರ್, ಮತ್ತು ವಿಟಮಿನ್ ಎ ಡೋಸ್‌ಗಳು.\n"
+        "• **5 ರಿಂದ 6 ವರ್ಷಗಳಲ್ಲಿ:** ಡಿಪಿಟಿ ಬೂಸ್ಟರ್-2.\n"
+        "• **10 ಮತ್ತು 16 ವರ್ಷಗಳಲ್ಲಿ:** ಟಿಡಿ (ಧನುರ್ವಾಯು ಮತ್ತು ಡಿಫ್ತೀರಿಯಾ).\n\n"
+        "**ಮುಖ್ಯ ಸೂಚನೆಗಳು:**\n"
+        "• ಎಲ್ಲಾ ಲಸಿಕೆಗಳು ಸರ್ಕಾರಿ ಪ್ರಾಥಮಿಕ ಆರೋಗ್ಯ ಕೇಂದ್ರಗಳು ಮತ್ತು ಉಪಕೇಂದ್ರಗಳಲ್ಲಿ **ಉಚಿತವಾಗಿ** ಲಭ್ಯವಿವೆ.\n"
+        "• ಲಸಿಕೆಗೆ ಹೋಗುವಾಗ ಯಾವಾಗಲೂ **ತಾಯಿ-ಮಗು ಸಂರಕ್ಷಣಾ (MCP) ಕಾರ್ಡ್** ಕೊಂಡೊಯ್ಯಿರಿ.\n"
+        "• ಲಸಿಕೆಯ ನಂತರ ಸ್ವಲ್ಪ ಜ್ವರ ಅಥವಾ ನೋವು ಸಹಜ; ತೀವ್ರ ತೊಂದರೆಯಿದ್ದರೆ ಆರೋಗ್ಯ ಕಾರ್ಯಕರ್ತರನ್ನು ಸಂಪರ್ಕಿಸಿ."
+    )
+}
+
+# =============================================================================
+# Multilingual Maternal Health Guidance
+# =============================================================================
+
+MATERNAL_HEALTH_GUIDANCE = {
+    "English": (
+        "## Comprehensive Maternal Health & Antenatal Care (ANC) Guidance\n\n"
+        "Regular maternal healthcare ensures a safe pregnancy, healthy delivery, and positive outcomes for both mother and baby:\n"
+        "• **Antenatal Care (ANC) Visits:** Attend at least 4 comprehensive antenatal checkups (1st trimester registration, 14–26 weeks, 28–34 weeks, and 36 weeks to delivery).\n"
+        "• **Essential Clinical Screenings:** Regular monitoring of Blood Pressure (to prevent pre-eclampsia), Hemoglobin testing (to detect anaemia), urine tests for protein/sugar, blood grouping/Rh typing, and gestational diabetes screening (OGTT).\n"
+        "• **Ultrasound Scans:** Dating scan in early pregnancy and detailed anomaly scan around 18–20 weeks.\n"
+        "• **Iron, Folic Acid & Calcium:** Take daily Folic Acid (400 mcg) in early pregnancy. After the 1st trimester, take daily Iron Folic Acid (IFA) tablets and Calcium supplements (take calcium and iron at different times of day with clean water, never with tea/coffee).\n"
+        "• **Tetanus Immunization:** Receive 2 doses of Td (Tetanus & adult Diphtheria) vaccine during pregnancy.\n"
+        "• **Danger Signs — Seek Immediate Emergency Care:** Vaginal bleeding, high blood pressure, severe headaches with blurred vision, sudden swelling of face/hands, high fever, severe abdominal pain, or noticeably reduced fetal movements."
+    ),
+    "Malayalam": (
+        "## സമഗ്ര മാതൃ ആരോഗ്യവും ഗർഭകാല പരിചരണവും (ANC)\n\n"
+        "സുരക്ഷിതമായ പ്രസവത്തിനും അമ്മയുടെയും കുഞ്ഞിന്റെയും ആരോഗ്യത്തിനും ചിട്ടയായ ഗർഭകാല പരിചരണം അത്യാവശ്യമാണ്:\n"
+        "• **ഗർഭകാല പരിശോധനകൾ (ANC Visits):** കുറഞ്ഞത് 4 പ്രാവശ്യമെങ്കിലും കൃത്യമായി ആശുപത്രിയിൽ/ക്ലിനിക്കിൽ പോയി പരിശോധന നടത്തുക (രജിസ്ട്രേഷൻ, 14-26 ആഴ്ച, 28-34 ആഴ്ച, 36 ആഴ്ചയ്ക്കു ശേഷം).\n"
+        "• **അത്യാവശ്യ പരിശോധനകൾ:** രക്തസമ്മർദ്ദം (BP - പ്രീ-എക്ലാംപ്സിയ തടയാൻ), ഹീമോഗ്ലോബിൻ (വിളർച്ച തടയാൻ), മൂത്രപരിശോധന, രക്തത്തിലെ പഞ്ചസാരയുടെ അളവ് (OGTT).\n"
+        "• **അൾട്രാസൗണ്ട് സ്കാനിംഗ്:** ആദ്യ മാസങ്ങളിലെ ഡേറ്റിംഗ് സ്കാനും 18-20 ആഴ്ചകളിലെ അനോമലി സ്കാനും കൃത്യമായി ചെയ്യുക.\n"
+        "• **മരുന്നുകളും സപ്ലിമെന്റുകളും:** ആദ്യ 3 മാസം ഫോളിക് ആസിഡ് ഗുളിക കഴിക്കുക. 3 മാസത്തിനു ശേഷം അയൺ (IFA), കാൽസ്യം ഗുളികകൾ ഡോക്ടറുടെ നിർദ്ദേശപ്രകാരം കഴിക്കുക (അയണും കാൽസ്യവും ഒരേ സമയം കഴിക്കരുത്; വെള്ളത്തോടൊപ്പം കഴിക്കുക, ചായ/കാപ്പിയോടൊപ്പം കഴിക്കരുത്).\n"
+        "• **ടിഡി കുത്തിവയ്പ്പ് (Td Vaccine):** ഗർഭകാലത്ത് 2 ഡോസ് ടിഡി വാക്സിൻ എടുക്കുക.\n"
+        "• **അടിയന്തര ശ്രദ്ധ ആവശ്യമുള്ള അപകട ലക്ഷണങ്ങൾ:** രക്തസ്രാവം, കഠിനമായ തലവേദന, കാഴ്ച മങ്ങൽ, മുഖത്തും കൈകളിലും പെട്ടെന്നുണ്ടാകുന്ന നീര്, ഉയർന്ന പനി, കഠിനമായ വയറുവേദന, കുഞ്ഞിന്റെ അനക്കം കുറയുക. ഇവ കണ്ടാൽ ഉടൻ ഡോക്ടറെ സമീപിക്കുക."
+    ),
+    "Hindi": (
+        "## व्यापक मातृ स्वास्थ्य एवं प्रसव पूर्व देखभाल (ANC) मार्गदर्शन\n\n"
+        "सुरक्षित प्रसव और मां-बच्चे के अच्छे स्वास्थ्य के लिए नियमित प्रसव पूर्व देखभाल आवश्यक है:\n"
+        "• **प्रसव पूर्व जांच (ANC Visits):** गर्भावस्था के दौरान कम से कम 4 बार अस्पताल/स्वास्थ्य केंद्र जाकर जांच अवश्य कराएं (पंजीकरण, 14-26 सप्ताह, 28-34 सप्ताह, और 36 सप्ताह के बाद)।\n"
+        "• **आवश्यक नैदानिक परीक्षण:** रक्तचाप (BP - प्री-एक्लेम्पसिया की रोकथाम), हीमोग्लोबिन (एनीमिया की पहचान), मूत्र परीक्षण, और गर्भकालीन मधुमेह जांच।\n"
+        "• **अल्ट्रासाउंड सोनोग्राफी:** शुरुआती हफ्तों में डेटिंग स्कैन और 18-20 हफ्तों में विसंगति (अनोमली) स्कैन जरूर कराएं।\n"
+        "• **आयरन, फोलिक एसिड एवं कैल्शियम:** पहले 3 महीने फोलिक एसिड लें। चौथे महीने से रोजाना आयरन (IFA) और कैल्शियम की गोलियां लें (आयरन और कैल्शियम को एक साथ न लें; चाय/कॉफी के साथ बिल्कुल न लें)।\n"
+        "• **टीडी का टीका (Td Vaccine):** गर्भावस्था में टीडी के 2 टीके अवश्य लगवाएं।\n"
+        "• **खतरे के संकेत — तुरंत अस्पताल जाएं:** योनि से रक्तस्राव, सिर में तेज दर्द व धुंधला दिखाई देना, चेहरे/हाथों पर अचानक सूजन, तेज बुखार, पेट में तेज दर्द, या गर्भस्थ शिशु की हलचल कम होना।"
+    ),
+    "Kannada": (
+        "## ಸಮಗ್ರ ಮಾತೃ ಆರೋಗ್ಯ ಮತ್ತು ಪ್ರಸವಪೂರ್ವ ಆರೈಕೆ (ANC) ಮಾರ್ಗದರ್ಶನ\n\n"
+        "ಸುರಕ್ಷಿತ ಹೆರಿಗೆ ಮತ್ತು ತಾಯಿ-ಮಗುವಿನ ಉತ್ತಮ ಆರೋಗ್ಯಕ್ಕಾಗಿ ನಿಯಮಿತ ತಪಾಸಣೆ ಅತ್ಯಗತ್ಯ:\n"
+        "• **ಪ್ರಸವಪೂರ್ವ ತಪಾಸಣೆಗಳು (ANC Visits):** ಗರ್ಭಾವಸ್ಥೆಯಲ್ಲಿ ಕನಿಷ್ಠ 4 ತಪಾಸಣೆಗಳನ್ನು ಮಾಡಿಸಿಕೊಳ್ಳಿ (ನೋಂದಣಿ, 14-26 ವಾರಗಳು, 28-34 ವಾರಗಳು, ಮತ್ತು 36 ವಾರಗಳ ನಂತರ).\n"
+        "• **ಅಗತ್ಯ ಪರೀಕ್ಷೆಗಳು:** ರಕ್ತದೊತ್ತಡ (BP), ಹಿಮೋಗ್ಲೋಬಿನ್ (ರಕ್ತಹೀನತೆ ತಡೆಗೆ), ಮೂತ್ರ ಪರೀಕ್ಷೆ, ಮತ್ತು ಗರ್ಭಾವಸ್ಥೆಯ ಮಧುಮೇಹ ಪರೀಕ್ಷೆ.\n"
+        "• **ಅಲ್ಟ್ರಾಸೌಂಡ್ ಸ್ಕ್ಯಾನಿಂಗ್:** ಆರಂಭಿಕ ವಾರಗಳಲ್ಲಿ ಡೇಟಿಂಗ್ ಸ್ಕ್ಯಾನ್ ಮತ್ತು 18-20 ವಾರಗಳಲ್ಲಿ ಅನಾಮಲಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಿಸಿ.\n"
+        "• **ಪೂರಕ ಮಾತ್ರೆಗಳು:** ಮೊದಲ 3 ತಿಂಗಳು ಫೋಲಿಕ್ ಆಸಿಡ್ ತೆಗೆದುಕೊಳ್ಳಿ. 4ನೇ ತಿಂಗಳಿಂದ ಪ್ರತಿದಿನ ಐರನ್ (IFA) ಮತ್ತು ಕ್ಯಾಲ್ಸಿಯಂ ಮಾತ್ರೆಗಳನ್ನು ಸೇವಿಸಿ (ಐರನ್ ಮತ್ತು ಕ್ಯಾಲ್ಸಿಯಂ ಒಂದೇ ಸಮಯದಲ್ಲಿ ತೆಗೆದುಕೊಳ್ಳಬೇಡಿ; ಟೀ/ಕಾಫಿ ಜೊತೆ ಸೇವಿಸಬೇಡಿ).\n"
+        "• **ಟಿಡಿ ಲಸಿಕೆ (Td Vaccine):** ಗರ್ಭಾವಸ್ಥೆಯಲ್ಲಿ 2 ಡೋಸ್ ಟಿಡಿ ಲಸಿಕೆಗಳನ್ನು ಪಡೆಯಿರಿ.\n"
+        "• **ಅಪಾಯದ ಲಕ್ಷಣಗಳು — ತಕ್ಷಣ ಆಸ್ಪತ್ರೆಗೆ ಭೇಟಿ ನೀಡಿ:** ರಕ್ತಸ್ರಾವ, ತೀವ್ರ ತಲೆನೋವು ಮತ್ತು ದೃಷ್ಟಿ ಮಂದವಾಗುವುದು, ಮುಖ/ಕೈಗಳಲ್ಲಿ ಹಠಾತ್ ಊತ, ತೀವ್ರ ಜ್ವರ, ಹೊಟ್ಟೆ ನೋವು, ಅಥವಾ ಮಗುವಿನ ಚಲನವಲನ ಕಡಿಮೆಯಾಗುವುದು."
+    )
+}
+
+# =============================================================================
 # Multilingual Keyword Normalization & Detection
 # =============================================================================
 
@@ -884,14 +994,43 @@ NUTRIENT_KEYWORDS = {
 def _normalize(text):
     return re.sub(r'\s+', ' ', text.lower().strip())
 
+def detect_script_language(text):
+    """
+    Detects language script from Indic Unicode ranges if present.
+    Returns 'Malayalam', 'Hindi', 'Kannada', or None.
+    """
+    if not text:
+        return None
+    for ch in text:
+        code = ord(ch)
+        if 0x0D00 <= code <= 0x0D7F:
+            return 'Malayalam'
+        if 0x0900 <= code <= 0x097F:
+            return 'Hindi'
+        if 0x0C80 <= code <= 0x0CFF:
+            return 'Kannada'
+    return None
+
 def find_nutrient_match(question):
-    """Detects nutrient from English, Malayalam, Hindi, or Kannada query."""
+    """Detects first nutrient from English, Malayalam, Hindi, or Kannada query."""
     q = _normalize(question)
     for nutrient, kws in NUTRIENT_KEYWORDS.items():
         for kw in kws:
             if kw.lower() in q:
                 return nutrient
     return None
+
+def find_all_nutrient_matches(question):
+    """Detects all matching nutrients from English, Malayalam, Hindi, or Kannada query."""
+    q = _normalize(question)
+    matched = []
+    for nutrient, kws in NUTRIENT_KEYWORDS.items():
+        for kw in kws:
+            if kw.lower() in q:
+                if nutrient not in matched:
+                    matched.append(nutrient)
+                break
+    return matched
 
 def build_fallback_response(question, context, language='English', child_age_months=None):
     """
@@ -901,7 +1040,26 @@ def build_fallback_response(question, context, language='English', child_age_mon
         language = 'English'
 
     q = _normalize(question)
-    nutrient = find_nutrient_match(q)
+    matched_nutrients = find_all_nutrient_matches(q)
+
+    # Detect vaccination keywords across all 4 scripts
+    is_vaccination = any(w in q for w in [
+        'vaccin', 'immuniz', 'bcg', 'polio', 'opv', 'pentavalent', 'rotavirus', 'measles', 'rubella',
+        'dpt', 'shot', 'hepatitis', 'nis', 'uip',
+        'കുത്തിവയ്പ്പ്', 'വാക്സിൻ', 'പ്രതിരോധ കുത്തിവയ്പ്പ്', 'പോളിയോ', 'ബിസിജി', 'മീസിൽസ്', 'റുബെല്ല',
+        'ടിഡി', 'പെന്റാവാലന്റ്',
+        'टीका', 'टीकाकरण', 'वैक्सीन', 'पोलियो', 'खसरा', 'रूबेला', 'बीसीजी', 'पेंटावेलेंट', 'हेपेटाइटिस',
+        'ಲಸಿಕೆ', 'ಚುಚ್ಚುಮದ್ದು', 'ಪೋಲಿಯೋ', 'ಬಿಸಿಜಿ', 'ದಡಾರ', 'ರುಬೆಲ್ಲಾ', 'ಪೆಂಟಾವಲೆಂಟ್'
+    ])
+
+    # Detect maternal health & clinical care keywords across all 4 scripts
+    is_maternal_health = any(w in q for w in [
+        'antenatal', 'anc', 'checkup', 'maternal health', 'danger signs', 'warning signs',
+        'blood pressure', 'prenatal care', 'maternal care', 'complications',
+        'മാതൃ ആരോഗ്യം', 'ഗർഭകാല പരിശോധന', 'അപകട ലക്ഷണങ്ങൾ', 'രക്തസമ്മർദ്ദം', 'സ്കാനിംഗ്',
+        'मातृ स्वास्थ्य', 'प्रसव पूर्व', 'स्वास्थ्य जांच', 'खतरे के लक्षण', 'रक्तचाप', 'सोनोग्राफी',
+        'ಮಾತೃ ಆರೋಗ್ಯ', 'ಪ್ರಸವಪೂರ್ವ', 'ಆರೋಗ್ಯ ತಪಾಸಣೆ', 'ಅಪಾಯದ ಲಕ್ಷಣಗಳು', 'ರಕ್ತದೊತ್ತಡ', 'ಸ್ಕ್ಯಾನಿಂಗ್'
+    ])
 
     # Detect context keywords in multiple scripts
     is_pregnancy = any(w in q for w in [
@@ -921,54 +1079,59 @@ def build_fallback_response(question, context, language='English', child_age_mon
         ]) or context == 'Child Nutrition'
     )
 
-    base = None
+    parts = []
     lang_ctx = CONTEXT_GUIDANCE.get(language, CONTEXT_GUIDANCE['English'])
 
+    # 1. Nutrient specific information (supports single or multiple nutrients)
+    if matched_nutrients:
+        for nut in matched_nutrients:
+            if nut in NUTRIENT_KB:
+                kb_entry = NUTRIENT_KB[nut].get(language, NUTRIENT_KB[nut]['English'])
+                nut_part = [f"## {kb_entry['title']}\n"]
+                if language == 'Malayalam':
+                    nut_part.append(f"**പ്രാധാന്യം:**\n{kb_entry['importance']}\n")
+                    nut_part.append(f"**ഭക്ഷണ സ്രോതസ്സുകൾ:**\n{kb_entry['food_sources']}\n")
+                    nut_part.append(f"**കുറവിന്റെ ലക്ഷണങ്ങൾ:**\n{kb_entry['deficiency_symptoms']}\n")
+                    nut_part.append(f"**പൊതുവായ മാർഗ്ഗനിർദ്ദേശം:**\n{kb_entry['dietary_guidance']}")
+                elif language == 'Hindi':
+                    nut_part.append(f"**महत्व:**\n{kb_entry['importance']}\n")
+                    nut_part.append(f"**खाद्य स्रोत:**\n{kb_entry['food_sources']}\n")
+                    nut_part.append(f"**कमी के लक्षण:**\n{kb_entry['deficiency_symptoms']}\n")
+                    nut_part.append(f"**सामान्य मार्गदर्शन:**\n{kb_entry['dietary_guidance']}")
+                elif language == 'Kannada':
+                    nut_part.append(f"**ಪ್ರಾಮುಖ್ಯತೆ:**\n{kb_entry['importance']}\n")
+                    nut_part.append(f"**ಆಹಾರ ಮೂಲಗಳು:**\n{kb_entry['food_sources']}\n")
+                    nut_part.append(f"**ಕೊರತೆಯ ಲಕ್ಷಣಗಳು:**\n{kb_entry['deficiency_symptoms']}\n")
+                    nut_part.append(f"**ಸಾಮಾನ್ಯ ಮಾರ್ಗದರ್ಶನ:**\n{kb_entry['dietary_guidance']}")
+                else:
+                    nut_part.append(f"**Why it matters:**\n{kb_entry['importance']}\n")
+                    nut_part.append(f"**Indian food sources:**\n{kb_entry['food_sources']}\n")
+                    nut_part.append(f"**Signs that may suggest low intake:**\n{kb_entry['deficiency_symptoms']}\n")
+                    nut_part.append(f"**General dietary guidance:**\n{kb_entry['dietary_guidance']}")
+                parts.append("\n".join(nut_part))
+
+    # 2. Vaccination Guidance
+    if is_vaccination:
+        parts.append(VACCINATION_GUIDANCE.get(language, VACCINATION_GUIDANCE['English']))
+
+    # 3. Maternal Health Guidance
+    if is_maternal_health:
+        parts.append(MATERNAL_HEALTH_GUIDANCE.get(language, MATERNAL_HEALTH_GUIDANCE['English']))
+
+    # 4. Context or general guidance if not already addressed
     if is_child and child_age_months is not None:
-        base = get_child_age_guidance(child_age_months, language)
-    elif is_pregnancy:
-        base = lang_ctx.get('pregnancy')
-    elif is_postnatal:
-        base = lang_ctx.get('postnatal')
-    elif context == 'General Nutrition' and not nutrient:
-        base = lang_ctx.get('general')
-
-    parts = []
-
-    # Nutrient specific information
-    if nutrient and nutrient in NUTRIENT_KB:
-        kb_entry = NUTRIENT_KB[nutrient].get(language, NUTRIENT_KB[nutrient]['English'])
-        parts.append(f"## {kb_entry['title']}\n")
-        
-        # Localized field labels
-        if language == 'Malayalam':
-            parts.append(f"**പ്രാധാന്യം:**\n{kb_entry['importance']}\n")
-            parts.append(f"**ഭക്ഷണ സ്രോതസ്സുകൾ:**\n{kb_entry['food_sources']}\n")
-            parts.append(f"**കുറവിന്റെ ലക്ഷണങ്ങൾ:**\n{kb_entry['deficiency_symptoms']}\n")
-            parts.append(f"**പൊതുവായ മാർഗ്ഗനിർദ്ദേശം:**\n{kb_entry['dietary_guidance']}")
-        elif language == 'Hindi':
-            parts.append(f"**महत्व:**\n{kb_entry['importance']}\n")
-            parts.append(f"**खाद्य स्रोत:**\n{kb_entry['food_sources']}\n")
-            parts.append(f"**कमी के लक्षण:**\n{kb_entry['deficiency_symptoms']}\n")
-            parts.append(f"**सामान्य मार्गदर्शन:**\n{kb_entry['dietary_guidance']}")
-        elif language == 'Kannada':
-            parts.append(f"**ಪ್ರಾಮುಖ್ಯತೆ:**\n{kb_entry['importance']}\n")
-            parts.append(f"**ಆಹಾರ ಮೂಲಗಳು:**\n{kb_entry['food_sources']}\n")
-            parts.append(f"**ಕೊರತೆಯ ಲಕ್ಷಣಗಳು:**\n{kb_entry['deficiency_symptoms']}\n")
-            parts.append(f"**ಸಾಮಾನ್ಯ ಮಾರ್ಗದರ್ಶನ:**\n{kb_entry['dietary_guidance']}")
-        else:
-            parts.append(f"**Why it matters:**\n{kb_entry['importance']}\n")
-            parts.append(f"**Indian food sources:**\n{kb_entry['food_sources']}\n")
-            parts.append(f"**Signs that may suggest low intake:**\n{kb_entry['deficiency_symptoms']}\n")
-            parts.append(f"**General dietary guidance:**\n{kb_entry['dietary_guidance']}")
-
-    if base:
-        parts.append(base)
+        parts.append(get_child_age_guidance(child_age_months, language))
+    elif is_pregnancy and not matched_nutrients and not is_maternal_health:
+        parts.append(lang_ctx.get('pregnancy', ''))
+    elif is_postnatal and not matched_nutrients:
+        parts.append(lang_ctx.get('postnatal', ''))
+    elif context == 'General Nutrition' and not matched_nutrients and not is_vaccination and not is_maternal_health:
+        parts.append(lang_ctx.get('general', ''))
 
     if not parts:
         parts.append(lang_ctx.get('general', CONTEXT_GUIDANCE['English']['general']))
 
-    # Append disclaimer
+    # Append localized disclaimer
     parts.append(f"\n---\n{DISCLAIMERS.get(language, DISCLAIMERS['English'])}")
     return "\n\n".join(parts)
 
@@ -980,14 +1143,17 @@ def get_ai_response(question, context, language='English', chat_history=None, ch
     """
     Calls Gemini API if GEMINI_API_KEY is configured.
     Falls back gracefully to the built-in multilingual knowledge base.
+    Automatically respects language script of question or preferred language.
     """
-    if language not in ('English', 'Malayalam', 'Hindi', 'Kannada'):
-        language = 'English'
+    detected_script = detect_script_language(question)
+    effective_language = detected_script if detected_script else (
+        language if language in ('English', 'Malayalam', 'Hindi', 'Kannada') else 'English'
+    )
 
     api_key = os.environ.get('GEMINI_API_KEY', '').strip()
 
     if not api_key:
-        return build_fallback_response(question, context, language, child_age_months), False
+        return build_fallback_response(question, context, effective_language, child_age_months), False
 
     try:
         from google import genai
@@ -999,8 +1165,8 @@ def get_ai_response(question, context, language='English', chat_history=None, ch
         if child_age_months is not None:
             context_note += f" | Child Age: {child_age_months} months"
         language_note = (
-            f"CRITICAL: The user has chosen {language}. You MUST formulate the entire reply in "
-            f"{language} using proper script. Do NOT reply in English unless English was requested."
+            f"CRITICAL: The user has chosen {effective_language}. You MUST formulate the entire reply in "
+            f"{effective_language} using proper script. Do NOT reply in English unless English was requested."
         )
 
         full_prompt = f"{context_note}\n{language_note}\n\nQuestion: {question}"
@@ -1016,7 +1182,7 @@ def get_ai_response(question, context, language='English', chat_history=None, ch
 
         system_instruction = (
             "You are MomCare Nutrition Assistant, a maternal and child nutrition expert for India. "
-            f"You provide accurate, culturally relevant Indian food advice. Answer in {language}. "
+            f"You provide accurate, culturally relevant Indian food advice. Answer in {effective_language}. "
             "Never diagnose deficiencies from symptoms alone; always suggest consulting a doctor or blood test. "
             "Never prescribe supplement doses or advise stopping doctor medications."
         )
@@ -1035,5 +1201,5 @@ def get_ai_response(question, context, language='English', chat_history=None, ch
         return response.text, True
 
     except Exception:
-        fallback = build_fallback_response(question, context, language, child_age_months)
+        fallback = build_fallback_response(question, context, effective_language, child_age_months)
         return fallback, False

@@ -63,7 +63,7 @@
         <div class="flash-container">
             {% for category, message in messages %}
             <div class="alert alert-{{ category }}">
-                <span>{{ message }}</span>
+                <span>{{ t(message) }}</span>
             </div>
             {% endfor %}
         </div>
@@ -78,7 +78,7 @@
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                     </svg>
-                    Child Growth &amp; Development Monitoring
+                    {{ t('Child Growth & Development Monitoring') }}
                 </div>
                 <h2>{{ child.full_name }} &bull; Growth Records</h2>
                 <div class="vax-meta-row">
@@ -95,11 +95,11 @@
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
-                    Record New Measurement
+                    {{ t('Record New Measurement') }}
                 </a>
                 {% endif %}
                 <a href="{{ url_for('child_vaccination_schedule', child_id=child.id) }}" class="btn btn-outline btn-sm">
-                    View Immunizations
+                    {{ t('View Immunizations') }}
                 </a>
             </div>
         </div>
@@ -121,19 +121,19 @@
         <div class="vax-summary-card" style="margin-top: 1.5rem;">
             <div class="vax-summary-item">
                 <span class="vax-summary-num">{{ latest.weight ~ ' kg' if latest else (child.birth_weight ~ ' kg (Birth)' if child.birth_weight else '—') }}</span>
-                <span class="vax-summary-lbl">Current Weight</span>
+                <span class="vax-summary-lbl">{{ t('Current Weight') }}</span>
             </div>
             <div class="vax-summary-item">
                 <span class="vax-summary-num">{{ latest.height ~ ' cm' if latest else '—' }}</span>
-                <span class="vax-summary-lbl">Current Height / Length</span>
+                <span class="vax-summary-lbl">{{ t('Current Height / Length') }}</span>
             </div>
             <div class="vax-summary-item">
                 <span class="vax-summary-num">{{ latest.head_circumference ~ ' cm' if (latest and latest.head_circumference) else '—' }}</span>
-                <span class="vax-summary-lbl">Head Circumference</span>
+                <span class="vax-summary-lbl">{{ t('Head Circumference') }}</span>
             </div>
             <div class="vax-summary-item">
                 <span class="vax-summary-num" style="color: #073528;">{{ latest.bmi ~ ' kg/m²' if (latest and latest.bmi) else '—' }}</span>
-                <span class="vax-summary-lbl">Pediatric BMI</span>
+                <span class="vax-summary-lbl">{{ t('Pediatric BMI') }}</span>
             </div>
             <div class="vax-summary-item">
                 <span class="vax-summary-num" style="font-size: 1.1rem; color: #073528;">
@@ -143,7 +143,7 @@
                         Pending
                     {% endif %}
                 </span>
-                <span class="vax-summary-lbl">Latest Checkup Date</span>
+                <span class="vax-summary-lbl">{{ t('Latest Checkup Date') }}</span>
             </div>
         </div>
 
@@ -157,7 +157,7 @@
                         <line x1="12" y1="16" x2="12" y2="12" />
                         <line x1="12" y1="8" x2="12.01" y2="8" />
                     </svg>
-                    WHO Child Growth Standards (0 to 5 Years)
+                    {{ t('WHO Child Growth Standards (0 to 5 Years)') }}
                 </div>
                 <span class="vax-reminder-disclaimer">
                     Clinical reference percentiles validated by the World Health Organization Multicentre Growth Reference Study.
@@ -189,7 +189,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
                 <div>
                     <h3 style="font-family: 'Poppins', sans-serif; font-size: 1.15rem; color: var(--forest-primary); margin: 0;">
-                        Interactive Child Growth Curves
+                        {{ t('Interactive Child Growth Curves') }}
                     </h3>
                     <p style="font-size: 0.825rem; color: var(--text-secondary); margin: 0.25rem 0 0 0;">
                         Visualizing physical development trajectory over clinical checkup visits.
@@ -230,7 +230,7 @@
                     {% if who_ref %}
                     <span style="display: inline-flex; align-items: center; gap: 0.35rem;">
                         <span style="width: 16px; height: 2px; background: #78857D;"></span>
-                        WHO Reference Median
+                        {{ t('WHO Reference Median') }}
                     </span>
                     {% endif %}
                 </div>
@@ -354,7 +354,7 @@
 
     <footer class="footer">
         <div class="container footer-content">
-            <p>&copy; 2026 MomCare. Child Growth &amp; Development Monitoring.</p>
+            <p>&copy; 2026 MomCare. {{ t('Child Growth & Development Monitoring') }}.</p>
             <p class="footer-note">Compassionate care for every mother and child.</p>
         </div>
     </footer>

@@ -1,32 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Live Health Check Button on Home Page
-    const testBtn = document.getElementById('test-connection-btn');
-    const healthResult = document.getElementById('health-result');
-
-    if (testBtn && healthResult) {
-        testBtn.addEventListener('click', async () => {
-            healthResult.textContent = 'Checking connection...';
-            healthResult.style.color = '#78857D';
-
-            try {
-                const response = await fetch('/health');
-                const data = await response.json();
-
-                if (response.ok && data.status === 'healthy') {
-                    healthResult.textContent = `[OK] Flask server & SQLite database reachable (${new Date().toLocaleTimeString()})`;
-                    healthResult.style.color = '#073528';
-                } else {
-                    healthResult.textContent = `[Error] ${data.error || 'Unexpected status'}`;
-                    healthResult.style.color = '#991B1B';
-                }
-            } catch (err) {
-                healthResult.textContent = `[Error] Connection failed: ${err.message}`;
-                healthResult.style.color = '#991B1B';
-            }
-        });
-    }
-
-    // 2. Password Visibility Toggle (Show / Hide Password with professional SVGs)
+    // Password Visibility Toggle (Show / Hide Password with professional SVGs)
     const toggleButtons = document.querySelectorAll('.btn-toggle-password');
     toggleButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -58,5 +31,209 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Passwords do not match. Please ensure both password fields are identical.');
             }
         });
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. Side Navigation Drawer Controller (Mobile & Desktop)
+    // -------------------------------------------------------------------------
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebarDrawer = document.getElementById('momcare-sidebar');
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+    const sidebarClose = document.getElementById('sidebar-close');
+
+    function openSidebar() {
+        if (!sidebarDrawer) return;
+        sidebarDrawer.classList.add('open');
+        sidebarDrawer.setAttribute('aria-hidden', 'false');
+        if (sidebarBackdrop) sidebarBackdrop.classList.add('active');
+        if (sidebarToggle) sidebarToggle.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+        if (!sidebarDrawer) return;
+        sidebarDrawer.classList.remove('open');
+        sidebarDrawer.setAttribute('aria-hidden', 'true');
+        if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+        if (sidebarToggle) sidebarToggle.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    }
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (sidebarDrawer && sidebarDrawer.classList.contains('open')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        });
+    }
+
+    if (sidebarClose) {
+        sidebarClose.addEventListener('click', closeSidebar);
+    }
+
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener('click', closeSidebar);
+    }
+
+    // Outside click fallback: Close if clicking anywhere outside sidebar drawer
+    document.addEventListener('click', (e) => {
+        if (sidebarDrawer && sidebarDrawer.classList.contains('open')) {
+            if (!sidebarDrawer.contains(e.target) && sidebarToggle && !sidebarToggle.contains(e.target)) {
+                closeSidebar();
+            }
+        }
+    });
+
+    // Keyboard support: Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebarDrawer && sidebarDrawer.classList.contains('open')) {
+            closeSidebar();
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 5. Mother Dashboard View Navigation (Section switching without scroll)
+    // -------------------------------------------------------------------------
+    window.switchDashboardView = function(viewKey) {
+        const overviewSection = document.getElementById('dashboard-overview-container');
+        const childrenSection = document.getElementById('registered-children-section');
+        const vaccinationSection = document.getElementById('vaccination-management-section');
+        const growthSection = document.getElementById('growth-monitoring-section');
+        const wellnessSection = document.getElementById('wellness-section');
+        const communitySection = document.getElementById('community-section');
+        const consultationSection = document.getElementById('consultation-section');
+        const infoContainer = document.getElementById('information-panels-container');
+        const viewBar = document.getElementById('dashboard-view-bar');
+        const viewTitle = document.getElementById('dashboard-view-title');
+
+        if (!overviewSection) {
+            return;
+        }
+
+        const sections = [
+            overviewSection,
+            childrenSection,
+            vaccinationSection,
+            growthSection,
+            infoContainer
+        ].filter(Boolean);
+
+        // Update active highlight in sidebar
+        document.querySelectorAll('.sidebar-nav-item').forEach(el => {
+            const sec = el.getAttribute('data-section');
+            if (sec) {
+                el.classList.toggle('active', sec === viewKey || (viewKey === 'all' && sec === 'overview'));
+            }
+        });
+
+        if (viewKey === 'overview') {
+            // Show overview banner & stats, hide detailed lists
+            sections.forEach(s => s.style.display = 'none');
+            overviewSection.style.display = 'block';
+            if (infoContainer) {
+                infoContainer.style.display = 'grid';
+                if (wellnessSection) wellnessSection.style.display = 'block';
+                if (communitySection) communitySection.style.display = 'block';
+            }
+            if (viewBar) viewBar.style.display = 'none';
+            if (history.replaceState) history.replaceState(null, null, ' ');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (viewKey === 'all') {
+            // Show all sections
+            sections.forEach(s => s.style.display = 'block');
+            if (infoContainer) {
+                infoContainer.style.display = 'grid';
+                if (wellnessSection) wellnessSection.style.display = 'block';
+                if (communitySection) communitySection.style.display = 'block';
+            }
+            if (viewBar) {
+                viewBar.style.display = 'flex';
+                if (viewTitle) viewTitle.textContent = 'All Sections';
+            }
+            if (history.replaceState) history.replaceState(null, null, '#all');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            // Focus on the specific section
+            sections.forEach(s => s.style.display = 'none');
+            if (viewBar) viewBar.style.display = 'flex';
+
+            let titleText = '';
+
+            if (viewKey === 'children' && childrenSection) {
+                childrenSection.style.display = 'block';
+                titleText = 'Registered Children';
+            } else if (viewKey === 'vaccination' && vaccinationSection) {
+                vaccinationSection.style.display = 'block';
+                titleText = 'Child Immunization Schedule & Records';
+            } else if (viewKey === 'growth' && growthSection) {
+                growthSection.style.display = 'block';
+                titleText = 'Child Growth & Development Monitoring';
+            } else if (viewKey === 'wellness' && wellnessSection) {
+                if (infoContainer) infoContainer.style.display = 'block';
+                wellnessSection.style.display = 'block';
+                if (communitySection) communitySection.style.display = 'none';
+                titleText = 'Maternal Wellness & Nutrition';
+            } else if (viewKey === 'community' && communitySection) {
+                if (infoContainer) infoContainer.style.display = 'block';
+                if (wellnessSection) wellnessSection.style.display = 'none';
+                communitySection.style.display = 'block';
+                titleText = 'Healthcare Worker / Community Care';
+            } else if (viewKey === 'consultation' && communitySection) {
+                if (infoContainer) infoContainer.style.display = 'block';
+                if (wellnessSection) wellnessSection.style.display = 'none';
+                communitySection.style.display = 'block';
+                titleText = 'Health Consultation';
+                if (consultationSection) {
+                    consultationSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+
+            if (viewTitle) viewTitle.textContent = titleText;
+            if (history.replaceState) history.replaceState(null, null, '#' + viewKey);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Close sidebar drawer if open
+        closeSidebar();
+    };
+
+    // Attach click listeners to sidebar links with data-section
+    document.querySelectorAll('.sidebar-nav-item[data-section]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const sec = link.getAttribute('data-section');
+            if (sec && document.getElementById('dashboard-overview-container')) {
+                e.preventDefault();
+                window.switchDashboardView(sec);
+            }
+        });
+    });
+
+    // Check hash on page load (or default to overview)
+    if (document.getElementById('dashboard-overview-container')) {
+        const hash = window.location.hash.replace('#', '');
+        if (hash) {
+            if (['children', 'vaccination', 'growth', 'wellness', 'community', 'consultation', 'all', 'overview'].includes(hash)) {
+                window.switchDashboardView(hash);
+            } else if (hash === 'registered-children-section') {
+                window.switchDashboardView('children');
+            } else if (hash === 'vaccination-management-section') {
+                window.switchDashboardView('vaccination');
+            } else if (hash === 'growth-monitoring-section') {
+                window.switchDashboardView('growth');
+            } else if (hash === 'wellness-section') {
+                window.switchDashboardView('wellness');
+            } else if (hash === 'community-section') {
+                window.switchDashboardView('community');
+            } else if (hash === 'consultation-section') {
+                window.switchDashboardView('consultation');
+            } else {
+                window.switchDashboardView('overview');
+            }
+        } else {
+            window.switchDashboardView('overview');
+        }
     }
 });

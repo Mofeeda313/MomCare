@@ -59,7 +59,7 @@
         <div class="flash-container">
             {% for category, message in messages %}
             <div class="alert alert-{{ category }}">
-                <span>{{ message }}</span>
+                <span>{{ t(message) }}</span>
             </div>
             {% endfor %}
         </div>
@@ -121,9 +121,9 @@
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                         </svg>
-                        National Immunization Schedule (NIS) Progress
+                        {{ t('National Immunization Schedule (NIS) Progress') }}
                     </div>
-                    <div class="completion-percent">{{ summary.completed }} of {{ summary.total }} Completed ({{
+                    <div class="completion-percent">{{ summary.completed }} of {{ summary.total }} {{ t('Completed') }} ({{
                         summary.progress_pct }}%)</div>
                 </div>
                 <div class="progress-track">
@@ -165,7 +165,7 @@
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                     </svg>
-                    In-App Clinical Immunization Reminders
+                    {{ t('In-App Clinical Immunization Reminders') }}
                 </div>
                 <span class="vax-reminder-disclaimer">
                     System alerts based on India's National Immunization Schedule (NIS). External SMS/WhatsApp alerts
@@ -199,38 +199,38 @@
             <a href="{{ url_for('child_vaccination_schedule', child_id=child.id, status='all') }}"
                 data-filter="all"
                 class="vax-filter-pill {{ 'active' if status_filter == 'all' else '' }}">
-                All Schedule ({{ all_schedule|length }})
+                {{ t('All Schedule') }} ({{ all_schedule|length }})
             </a>
             <a href="{{ url_for('child_vaccination_schedule', child_id=child.id, status='overdue') }}"
                 data-filter="overdue"
                 class="vax-filter-pill {{ 'active' if status_filter == 'overdue' else '' }}">
-                Overdue ({{ summary.overdue }})
+                {{ t('Overdue') }} ({{ summary.overdue }})
             </a>
             <a href="{{ url_for('child_vaccination_schedule', child_id=child.id, status='due') }}"
                 data-filter="due"
                 class="vax-filter-pill {{ 'active' if status_filter == 'due' else '' }}">
-                Due Now ({{ summary.due }})
+                {{ t('Due Now') }} ({{ summary.due }})
             </a>
             <a href="{{ url_for('child_vaccination_schedule', child_id=child.id, status='upcoming') }}"
                 data-filter="upcoming"
                 class="vax-filter-pill {{ 'active' if status_filter == 'upcoming' else '' }}">
-                Upcoming ({{ summary.upcoming }})
+                {{ t('Upcoming') }} ({{ summary.upcoming }})
             </a>
             <a href="{{ url_for('child_vaccination_schedule', child_id=child.id, status='completed') }}"
                 data-filter="completed"
                 class="vax-filter-pill {{ 'active' if status_filter == 'completed' else '' }}">
-                Completed ({{ summary.completed }})
+                {{ t('Completed') }} ({{ summary.completed }})
             </a>
         </div>
 
         <!-- Continuous Vertical Menu Rows Container -->
         <div class="vax-vertical-list" id="vax-list-container">
             <div class="vax-list-header">
-                <div>Vaccine &amp; Dose</div>
-                <div>Recommended Age / Due Date</div>
+                <div>{{ t('Vaccine & Dose') }}</div>
+                <div>{{ t('Recommended Age / Due Date') }}</div>
                 <div>Immunization {{ t('Status') }}</div>
-                <div>Administration Details</div>
-                <div style="text-align: right;">Action</div>
+                <div>{{ t('Administration Details') }}</div>
+                <div style="text-align: right;">{{ t('Action') }}</div>
             </div>
 
             {% if all_schedule and all_schedule|length > 0 %}

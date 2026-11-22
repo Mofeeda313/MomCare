@@ -1085,6 +1085,7 @@ def admin_dashboard():
     return render_template('dashboard_admin.html', user=user, users=users, stats=stats, growth_stats=growth_stats, vax_stats=vax_stats)
 
 @app.route('/admin/database-viewer')
+@app.route('/admin/database')
 @login_required
 @role_required('Admin')
 def admin_database_viewer():
@@ -1262,7 +1263,12 @@ def chatbot_send():
     save_chat_message(session_id, 'user', question)
 
     # Get AI or fallback response
-    from chatbot_engine import get_ai_response
+    from chatbot_engine import get_ai_response, detect_script_language
+    detected_script = detect_script_language(question)
+    if detected_script:
+        language = detected_script
+        session['user_language'] = detected_script
+
     response_text, used_ai = get_ai_response(
         question=question,
         context=context,

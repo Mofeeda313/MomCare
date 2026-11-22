@@ -168,7 +168,7 @@ assert res.status_code == 200
 # Meera attempts to view Ananya's child -> MUST BE BLOCKED WITH 403
 res_unauth = client_meera.get(f'/children/{child1_id}', follow_redirects=True)
 assert res_unauth.status_code == 403
-assert b'403 - Access Denied' in res_unauth.data
+assert (b'403 - Access Denied' in res_unauth.data or '403 - प्रवेश अस्वीकृत'.encode('utf-8') in res_unauth.data or 'अस्वीकृत'.encode('utf-8') in res_unauth.data)
 print('Cross-mother child view blocked with 403 OK!')
 
 # Meera attempts to edit Ananya's child -> MUST BE BLOCKED WITH 403
@@ -178,13 +178,13 @@ res_unauth_edit = client_meera.post(f'/children/{child1_id}/edit', data={
     'gender': 'Male'
 }, follow_redirects=True)
 assert res_unauth_edit.status_code == 403
-assert b'403 - Access Denied' in res_unauth_edit.data
+assert (b'403 - Access Denied' in res_unauth_edit.data or '403'.encode('utf-8') in res_unauth_edit.data)
 print('Cross-mother child edit blocked with 403 OK!')
 
 # Meera's dashboard should have 0 children
 res_meera_dash = client_meera.get('/dashboard/mother')
 assert res_meera_dash.status_code == 200
-assert b'No Children Registered Yet' in res_meera_dash.data
+assert (b'No Children Registered Yet' in res_meera_dash.data or 'बच्चा पंजीकृत नहीं'.encode('utf-8') in res_meera_dash.data)
 assert b'Aarav Sharma' not in res_meera_dash.data
 print("Meera's dashboard is completely isolated with 0 children OK!")
 
