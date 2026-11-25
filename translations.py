@@ -420,7 +420,22 @@ TRANSLATIONS = {
         'Stop': 'നിർത്തുക',
         'Done': 'പൂർത്തിയായി',
         'Type your question or click the microphone to speak...': 'നിങ്ങളുടെ ചോദ്യം ടൈപ്പ് ചെയ്യുക അല്ലെങ്കിൽ സംസാരിക്കാൻ മൈക്രോഫോൺ ക്ലിക്ക് ചെയ്യുക...',
-        'Your personalized journey to a healthy pregnancy and motherhood.': 'ആരോഗ്യകരമായ ഗർഭകാലത്തിലേക്കും മാതൃത്വത്തിലേക്കുമുള്ള നിങ്ങളുടെ വ്യക്തിഗത യാത്ര.'
+        'Your personalized journey to a healthy pregnancy and motherhood.': 'ആരോഗ്യകരമായ ഗർഭകാലത്തിലേക്കും മാതൃത്വത്തിലേക്കുമുള്ള നിങ്ങളുടെ വ്യക്തിഗത യാത്ര.',
+
+        # --- Smart Reminders ---
+        'Smart Reminders': 'സ്മാർട്ട് ഓർമ്മപ്പെടുത്തലുകൾ',
+        'Smart Reminders & Notifications': 'സ്മാർട്ട് ഓർമ്മപ്പെടുത്തലുകളും അറിയിപ്പുകളും',
+        'Reminders & Notifications': 'ഓർമ്മപ്പെടുത്തലുകളും അറിയിപ്പുകളും',
+        'Overdue': 'കാലഹരണപ്പെട്ടവ',
+        'Due Today': 'ഇന്ന് ചെയ്യേണ്ടവ',
+        'Upcoming': 'വരാനിരിക്കുന്നവ',
+        'Completed': 'പൂർത്തിയായവ',
+        'Snoozed': 'നീട്ടിവെച്ചവ',
+        'Add Personal Reminder': 'വ്യക്തിഗത ഓർമ്മപ്പെടുത്തൽ ചേർക്കുക',
+        'Add Reminder': 'ഓർമ്മപ്പെടുത്തൽ ചേർക്കുക',
+        'Snooze': 'നീട്ടിവെക്കുക',
+        'Mark Complete': 'പൂർത്തിയായതായി അടയാളപ്പെടുത്തുക',
+        'All Reminders': 'എല്ലാ ഓർമ്മപ്പെടുത്തലുകളും'
     },
 
     'Hindi': {
@@ -822,7 +837,22 @@ TRANSLATIONS = {
         'Stop': 'रोकें',
         'Done': 'पूर्ण',
         'Type your question or click the microphone to speak...': 'अपना प्रश्न टाइप करें या बोलने के लिए माइक पर क्लिक करें...',
-        'Your personalized journey to a healthy pregnancy and motherhood.': 'एक स्वस्थ गर्भावस्था और मातृत्व के लिए आपकी व्यक्तिगत यात्रा।'
+        'Your personalized journey to a healthy pregnancy and motherhood.': 'एक स्वस्थ गर्भावस्था और मातृत्व के लिए आपकी व्यक्तिगत यात्रा।',
+
+        # --- Smart Reminders ---
+        'Smart Reminders': 'स्मार्ट रिमाइंडर',
+        'Smart Reminders & Notifications': 'स्मार्ट रिमाइंडर और सूचनाएं',
+        'Reminders & Notifications': 'रिमाइंडर और सूचनाएं',
+        'Overdue': 'अतिदेय',
+        'Due Today': 'आज देय',
+        'Upcoming': 'आगामी',
+        'Completed': 'पूर्ण',
+        'Snoozed': 'स्नूज़ किया गया',
+        'Add Personal Reminder': 'व्यक्तिगत रिमाइंडर जोड़ें',
+        'Add Reminder': 'रिमाइंडर जोड़ें',
+        'Snooze': 'स्नूज़ करें',
+        'Mark Complete': 'पूर्ण चिह्नित करें',
+        'All Reminders': 'सभी रिमाइंडर'
     },
 
     'Kannada': {
@@ -1224,7 +1254,22 @@ TRANSLATIONS = {
         'Stop': 'ನಿಲ್ಲಿಸಿ',
         'Done': 'ಮುಗಿದಿದೆ',
         'Type your question or click the microphone to speak...': 'ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ ಅಥವಾ ಮಾತನಾಡಲು ಮೈಕ್ ಕ್ಲಿಕ್ ಮಾಡಿ...',
-        'Your personalized journey to a healthy pregnancy and motherhood.': 'ಆರೋಗ್ಯಕರ ಗರ್ಭಧಾರಣೆ ಮತ್ತು ಮಾತೃತ್ವಕ್ಕೆ ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಪ್ರಯಾಣ.'
+        'Your personalized journey to a healthy pregnancy and motherhood.': 'ಆರೋಗ್ಯಕರ ಗರ್ಭಧಾರಣೆ ಮತ್ತು ಮಾತೃತ್ವಕ್ಕೆ ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಪ್ರಯಾಣ.',
+
+        # --- Smart Reminders ---
+        'Smart Reminders': 'ಸ್ಮಾರ್ಟ್ ಜ್ಞಾಪನೆಗಳು',
+        'Smart Reminders & Notifications': 'ಸ್ಮಾರ್ಟ್ ಜ್ಞಾಪನೆಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಗಳು',
+        'Reminders & Notifications': 'ಜ್ಞಾಪನೆಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಗಳು',
+        'Overdue': 'ಅವಧಿ ಮೀರಿದ',
+        'Due Today': 'ಇಂದು ಬಾಕಿ',
+        'Upcoming': 'ಮುಂಬರುವ',
+        'Completed': 'ಪೂರ್ಣಗೊಂಡಿದೆ',
+        'Snoozed': 'ಮುಂದೂಡಲಾಗಿದೆ',
+        'Add Personal Reminder': 'ವೈಯಕ್ತಿಕ ಜ್ಞಾಪನೆ ಸೇರಿಸಿ',
+        'Add Reminder': 'ಜ್ಞಾಪನೆ ಸೇರಿಸಿ',
+        'Snooze': 'ಮುಂದೂಡಿ',
+        'Mark Complete': 'ಪೂರ್ಣಗೊಂಡಿದೆ ಎಂದು ಗುರುತಿಸಿ',
+        'All Reminders': 'ಎಲ್ಲಾ ಜ್ಞಾಪನೆಗಳು'
     }
 }
 

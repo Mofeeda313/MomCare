@@ -14,20 +14,35 @@
 </head>
 
 <body class="dashboard-body">
+    <!-- Collapsible Side Navigation Drawer -->
+    {% include '_sidebar_drawer.html' %}
+
     <!-- Navbar -->
     <header class="navbar">
         <div class="container nav-container">
-            <div class="logo">
-                <a href="{{ url_for('home') }}" class="logo-link">
-                    <span class="logo-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                        </svg>
-                    </span>
-                    <span class="logo-text">MomCare</span>
-                </a>
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <button type="button" class="btn-hamburger" id="sidebar-toggle"
+                    aria-label="{{ t('Toggle Navigation Menu') }}" aria-expanded="false"
+                    aria-controls="momcare-sidebar">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="logo">
+                    <a href="{{ url_for('home') }}" class="logo-link">
+                        <span class="logo-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>
+                        </span>
+                        <span class="logo-text">MomCare</span>
+                    </a>
+                </div>
             </div>
             <div class="nav-actions">
                 {% include '_language_picker.html' %}
@@ -36,10 +51,12 @@
                         <path
                             d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                     </svg>
-                    Mother
+                    {{ t('Mother') }}
                 </span>
-                <a href="{{ url_for('mother_dashboard') }}" class="btn btn-outline btn-sm">My Dashboard</a>
-                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">Sign Out</a>
+                <span class="user-greeting-pill">{{ t('Hi, {name}', name=user['full_name']) }}</span>
+                <a href="{{ url_for('mother_dashboard') }}" class="btn btn-outline btn-sm">{{ t('Dashboard') }}</a>
+                <a href="{{ url_for('mother_profile_view') }}" class="btn btn-outline btn-sm">{{ t('View Profile') }}</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">{{ t('Sign Out') }}</a>
             </div>
         </div>
     </header>
@@ -220,6 +237,7 @@
             }
         });
     </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 
 </html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t('Antenatal Checkups') }} - MomCare Healthcare Worker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Collapsible Side Navigation Drawer -->
+    {% include '_sidebar_drawer.html' %}
+
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <button type="button" class="btn-hamburger" id="sidebar-toggle"
+                    aria-label="{{ t('Toggle Navigation Menu') }}" aria-expanded="false"
+                    aria-controls="momcare-sidebar">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="logo">
+                    <a href="{{ url_for('home') }}" class="logo-link">
+                        <span class="logo-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>
+                        </span>
+                        <span class="logo-text">MomCare</span>
+                    </a>
+                </div>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge badge-worker">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                        <path d="M8 15v1a6 6 0 0 0 6 6h1" />
+                        <path d="M19 17a2 2 0 0 0 2-2V9a5 5 0 0 0-5-5" />
+                    </svg>
+                    Healthcare Worker
+                </span>
+                <span class="user-greeting-pill">{{ user['full_name'] }}</span>
+                <a href="{{ url_for('worker_dashboard') }}" class="btn btn-outline btn-sm">{{ t('Provider Dashboard') }}</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">{{ t('Sign Out') }}</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container dashboard-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ t(message) }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Feature Header Banner -->
+        <section class="dashboard-hero-banner" style="background: linear-gradient(135deg, #16362A 0%, #1A3A2D 100%); border-radius: 24px; padding: 2.25rem 2.5rem; margin-bottom: 2rem; color: #fff;">
+            <div class="banner-content">
+                <div class="banner-badge" style="background: #B67368; color: #fff; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.4rem 1rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; width: fit-content;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    {{ t('Maternal Healthcare') }}
+                </div>
+                <h1 style="font-family: var(--font-heading); font-size: 2.35rem; font-weight: 800; color: #fff; margin: 0 0 0.65rem 0;">{{ t('Antenatal Checkups & Maternal Tracking') }}</h1>
+                <p style="color: #BDD4C8; font-size: 1.05rem; line-height: 1.5; margin: 0; max-width: 650px;">{{ t('Coordinate trimester milestones, clinical screenings, tetanus vaccinations, and expected delivery readiness for community pregnant mothers.') }}</p>
+            </div>
+        </section>
+
+        <!-- ANC Trimester Metric Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ pregnant_mothers|length }}</div>
+                        <div class="stat-title">{{ t('Pregnant Beneficiaries') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <span style="font-weight: 800; font-size: 1.1rem; color: var(--forest-primary);">T1</span>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number">{{ anc_stats.trimester_1 }}</div>
+                        <div class="stat-title">{{ t('1st Trimester (1-12w)') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <span style="font-weight: 800; font-size: 1.1rem; color: #D97706;">T2</span>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number" style="color: #D97706;">{{ anc_stats.trimester_2 }}</div>
+                        <div class="stat-title">{{ t('2nd Trimester (13-27w)') }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-left">
+                    <div class="stat-icon">
+                        <span style="font-weight: 800; font-size: 1.1rem; color: #991B1B;">T3</span>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number" style="color: #991B1B;">{{ anc_stats.trimester_3 }}</div>
+                        <div class="stat-title">{{ t('3rd Trimester (28-40w+)') }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Antenatal Directory Section -->
+        <section class="table-section" style="background: #FFFFFF; border-radius: 20px; border: 1px solid rgba(7, 53, 40, 0.08); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); padding: 2rem; margin-bottom: 3rem;">
+            <div class="table-header-row" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem;">
+                <div>
+                    <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--forest-primary); margin: 0 0 0.25rem 0;">
+                        {{ t('Antenatal Clinical Beneficiaries') }}
+                    </h2>
+                    <p class="table-sub" style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">
+                        {{ t('National Health Mission standard 4-visit Antenatal Care (ANC) protocol schedule.') }}
+                    </p>
+                </div>
+                <a href="{{ url_for('worker_register_mother') }}" class="btn btn-outline btn-sm">
+                    + {{ t('Register Expectant Mother') }}
+                </a>
+            </div>
+
+            {% if pregnant_mothers and pregnant_mothers|length > 0 %}
+            <div class="table-responsive">
+                <table class="data-table" style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                    <thead>
+                        <tr style="background: #F8FAF9; text-align: left; font-size: 0.825rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8; border-top-left-radius: 10px;">{{ t('Mother & Contact') }}</th>
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8;">{{ t('Gestational Progress') }}</th>
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8;">{{ t('LMP & EDD') }}</th>
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8;">{{ t('ANC Milestone Schedule') }}</th>
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8; text-align: right; border-top-right-radius: 10px;">{{ t('Action') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pm in pregnant_mothers %}
+                        <tr style="border-bottom: 1px solid #F0F4F2; font-size: 0.925rem;">
+                            <td style="padding: 1rem 1.25rem;">
+                                <div style="font-weight: 700; color: var(--forest-primary);">{{ pm['full_name'] }}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.15rem;">
+                                    {{ pm['phone'] }} &bull; {{ pm['language'] }}
+                                </div>
+                            </td>
+                            <td style="padding: 1rem 1.25rem;">
+                                <div style="font-weight: 700; color: var(--forest-primary); font-size: 0.95rem;">
+                                    {{ pm.gestational_weeks }} {{ t('Weeks') }}
+                                </div>
+                                <span style="display: inline-block; margin-top: 0.25rem; padding: 0.2rem 0.6rem; border-radius: 10px; font-size: 0.75rem; font-weight: 600;
+                                    {% if pm.trimester == '1st Trimester' %}background: #ECFDF5; color: #065F46;
+                                    {% elif pm.trimester == '2nd Trimester' %}background: #FEF3C7; color: #92400E;
+                                    {% else %}background: #FEE2E2; color: #991B1B;{% endif %}">
+                                    {{ pm.trimester }}
+                                </span>
+                            </td>
+                            <td style="padding: 1rem 1.25rem;">
+                                <div style="font-size: 0.875rem; color: var(--forest-primary);">
+                                    <strong>EDD:</strong> {{ pm.profile.edd if pm.profile and pm.profile.edd else 'Pending calculation' }}
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.15rem;">
+                                    LMP: {{ pm.profile.lmp if pm.profile and pm.profile.lmp else 'Not recorded' }}
+                                </div>
+                            </td>
+                            <td style="padding: 1rem 1.25rem;">
+                                <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                                    <span style="font-size: 0.725rem; padding: 0.2rem 0.5rem; border-radius: 6px; font-weight: 600;
+                                        {% if pm.gestational_weeks >= 12 %}background: #D1FAE5; color: #065F46;{% else %}background: #F3F4F6; color: #6B7280;{% endif %}">
+                                        ANC 1 (12w)
+                                    </span>
+                                    <span style="font-size: 0.725rem; padding: 0.2rem 0.5rem; border-radius: 6px; font-weight: 600;
+                                        {% if pm.gestational_weeks >= 20 %}background: #D1FAE5; color: #065F46;{% elif pm.gestational_weeks >= 14 %}background: #FEF3C7; color: #92400E;{% else %}background: #F3F4F6; color: #6B7280;{% endif %}">
+                                        ANC 2 (20w)
+                                    </span>
+                                    <span style="font-size: 0.725rem; padding: 0.2rem 0.5rem; border-radius: 6px; font-weight: 600;
+                                        {% if pm.gestational_weeks >= 28 %}background: #D1FAE5; color: #065F46;{% elif pm.gestational_weeks >= 24 %}background: #FEF3C7; color: #92400E;{% else %}background: #F3F4F6; color: #6B7280;{% endif %}">
+                                        ANC 3 (28w)
+                                    </span>
+                                    <span style="font-size: 0.725rem; padding: 0.2rem 0.5rem; border-radius: 6px; font-weight: 600;
+                                        {% if pm.gestational_weeks >= 36 %}background: #D1FAE5; color: #065F46;{% elif pm.gestational_weeks >= 32 %}background: #FEF3C7; color: #92400E;{% else %}background: #F3F4F6; color: #6B7280;{% endif %}">
+                                        ANC 4 (36w)
+                                    </span>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem 1.25rem; text-align: right;">
+                                <a href="{{ url_for('worker_field_visits', mother_id=pm['id'], purpose='Routine Antenatal Checkup') }}"
+                                    class="btn btn-primary btn-xs" style="border-radius: 6px; padding: 0.35rem 0.75rem;">
+                                    {{ t('Log ANC Visit') }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding: 3rem 1.5rem; text-align: center; color: var(--text-secondary);">
+                <p>{{ t('No currently pregnant community mothers recorded in database.') }}</p>
+                <a href="{{ url_for('worker_register_mother') }}" class="btn btn-primary btn-sm" style="margin-top: 0.75rem;">
+                    + {{ t('Register Expectant Mother') }}
+                </a>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Logged in as {{ user['full_name'] }} (Healthcare Worker).</p>
+            <p class="footer-note">Compassionate care for every mother and child.</p>
+        </div>
+    </footer>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

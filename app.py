@@ -22,10 +22,15 @@ from database import (
     record_growth_measurement, update_growth_measurement, get_growth_measurement_by_id,
     get_child_growth_history, get_latest_growth_measurement, get_community_growth_stats,
     get_all_children_growth_for_workers, get_database_viewer_table, get_database_viewer_counts,
+    create_field_visit, get_field_visits_for_worker,
     # Phase 5 – Chatbot
     create_chat_session, get_active_chat_session, get_or_create_chat_session,
     save_chat_message, get_chat_messages, get_all_chat_sessions,
-    get_chat_session_by_id, close_chat_session
+    get_chat_session_by_id, close_chat_session,
+    # Smart Reminders & Notifications
+    add_custom_reminder, delete_custom_reminder,
+    snooze_smart_reminder, complete_smart_reminder,
+    get_smart_reminders_for_mother
 )
 
 from translations import translate_text, SUPPORTED_LANGUAGES
@@ -49,10 +54,19 @@ def filter_translate(text, **kwargs):
 @app.context_processor
 def inject_translations():
     lang = session.get('user_language', 'English')
+    badge_count = 0
+    if session.get('user_id') and session.get('user_role') == 'Mother':
+        try:
+            sel_cid = session.get('selected_child_id')
+            rem_data = get_smart_reminders_for_mother(session['user_id'], child_filter=str(sel_cid) if sel_cid else 'all')
+            badge_count = rem_data['counts']['overdue'] + rem_data['counts']['today']
+        except Exception:
+            badge_count = 0
     return {
         'current_lang': lang,
         't': lambda text, **kwargs: translate_text(text, lang, **kwargs),
-        'supported_languages': SUPPORTED_LANGUAGES
+        'supported_languages': SUPPORTED_LANGUAGES,
+        'smart_reminder_badge_count': badge_count
     }
 
 @app.before_request
@@ -392,13 +406,18 @@ def mother_dashboard():
             selected_child = next((c for c in children if c['id'] == child_id_param), children[0])
         else:
             selected_child = children[0]
+        session['selected_child_id'] = selected_child['id']
             
         selected_child_schedule = generate_child_vaccination_schedule(selected_child['id'])
         selected_child_summary = get_child_vaccination_summary(selected_child['id'])
         selected_child_growth = get_latest_growth_measurement(selected_child['id'])
         selected_child_growth_history = get_child_growth_history(selected_child['id'])
+    else:
+        session.pop('selected_child_id', None)
         
     in_app_reminders = get_in_app_reminders_for_mother(session['user_id'])
+    child_filter_val = str(selected_child['id']) if selected_child else 'all'
+    smart_reminders = get_smart_reminders_for_mother(session['user_id'], child_filter=child_filter_val)
     
     return render_template(
         'dashboard_mother.html',
@@ -411,7 +430,8 @@ def mother_dashboard():
         selected_child_summary=selected_child_summary,
         selected_child_growth=selected_child_growth,
         selected_child_growth_history=selected_child_growth_history,
-        in_app_reminders=in_app_reminders
+        in_app_reminders=in_app_reminders,
+        smart_reminders=smart_reminders
     )
 
 # --- Mother Profile Management Routes ---
@@ -695,7 +715,21 @@ def child_delete(child_id):
 @login_required
 @role_required('Healthcare Worker', 'Admin')
 def worker_dashboard():
-    """Healthcare Worker Dashboard with community mothers, children vaccination management & field tools."""
+    """Healthcare Worker Home Dashboard."""
+    view = request.args.get('view')
+    if view == 'register-mother':
+        return redirect(url_for('worker_register_mother'))
+    elif view == 'registered-mothers':
+        return redirect(url_for('worker_registered_mothers'))
+    elif view in ['growth', 'growth-monitoring']:
+        return redirect(url_for('community_growth_directory'))
+    elif view in ['immunization', 'immunization-management']:
+        return redirect(url_for('worker_immunization_management'))
+    elif view in ['antenatal', 'antenatal-checkups']:
+        return redirect(url_for('worker_antenatal_checkups'))
+    elif view in ['visits', 'field-visits']:
+        return redirect(url_for('worker_field_visits'))
+
     user = get_user_by_id(session['user_id'])
     mothers = get_users_by_role('Mother')
     
@@ -715,6 +749,212 @@ def worker_dashboard():
         growth_stats=growth_stats,
         growth_children=growth_children,
         search_query=search_q
+    )
+
+@app.route('/worker/register-mother', methods=['GET', 'POST'])
+@login_required
+@role_required('Healthcare Worker', 'Admin')
+def worker_register_mother():
+    """Dedicated page for Healthcare Worker to register a community mother."""
+    user = get_user_by_id(session['user_id'])
+    if request.method == 'POST':
+        full_name = request.form.get('full_name', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        phone = request.form.get('phone', '').strip()
+        language = request.form.get('language', 'English').strip()
+        pregnancy_status = request.form.get('pregnancy_status', 'Pregnant').strip()
+        blood_group = request.form.get('blood_group', '').strip()
+        lmp = request.form.get('lmp', '').strip()
+        edd = request.form.get('edd', '').strip()
+        notes = request.form.get('notes', '').strip()
+        password = request.form.get('password', 'MomCare2026!').strip()
+
+        if not full_name or not email or not phone:
+            flash('Full name, email address, and phone number are required.', 'danger')
+            return render_template('worker_mother_register.html', user=user)
+
+        existing = get_user_by_email(email)
+        if existing:
+            flash(f'An account with email "{email}" already exists in the system.', 'danger')
+            return render_template('worker_mother_register.html', user=user)
+
+        password_hash = generate_password_hash(password)
+        try:
+            mother_id = create_user(full_name, email, phone, password_hash, language, 'Mother')
+            if lmp and not edd:
+                edd = calculate_edd_from_lmp(lmp)
+            save_mother_profile(
+                user_id=mother_id,
+                dob=None,
+                address=None,
+                pregnancy_status=pregnancy_status,
+                lmp=lmp or None,
+                edd=edd or None,
+                blood_group=blood_group or None,
+                medical_history=notes or None,
+                emergency_contact_name=None,
+                emergency_contact_phone=None
+            )
+            flash(f'Mother "{full_name}" has been successfully registered into community care.', 'success')
+            return redirect(url_for('worker_registered_mothers'))
+        except Exception as e:
+            flash(f'Failed to register mother: {str(e)}', 'danger')
+            return render_template('worker_mother_register.html', user=user)
+
+    return render_template('worker_mother_register.html', user=user)
+
+@app.route('/worker/registered-mothers')
+@login_required
+@role_required('Healthcare Worker', 'Admin')
+def worker_registered_mothers():
+    """Dedicated page displaying only the Registered Mothers list."""
+    user = get_user_by_id(session['user_id'])
+    all_mothers = get_users_by_role('Mother')
+    search_q = request.args.get('q', '').strip().lower()
+
+    mothers_list = []
+    for m in all_mothers:
+        m_dict = dict(m)
+        prof = get_mother_profile(m['id'])
+        m_dict['profile'] = dict(prof) if prof else None
+        m_children = get_children_by_mother(m['id'])
+        m_dict['children_count'] = len(m_children)
+
+        if search_q:
+            name_match = search_q in m_dict['full_name'].lower()
+            email_match = search_q in (m_dict['email'] or '').lower()
+            phone_match = search_q in (m_dict['phone'] or '').lower()
+            if not (name_match or email_match or phone_match):
+                continue
+        mothers_list.append(m_dict)
+
+    return render_template(
+        'worker_mothers.html',
+        user=user,
+        mothers=mothers_list,
+        search_query=search_q
+    )
+
+@app.route('/worker/immunization-management')
+@login_required
+@role_required('Healthcare Worker', 'Admin')
+def worker_immunization_management():
+    """Dedicated page displaying only Child Immunization Management."""
+    user = get_user_by_id(session['user_id'])
+    search_q = request.args.get('q', '').strip()
+    community_children = get_all_children_for_workers(search_query=search_q)
+    vax_stats = get_community_vaccination_stats()
+
+    return render_template(
+        'worker_immunizations.html',
+        user=user,
+        community_children=community_children,
+        vax_stats=vax_stats,
+        search_query=search_q
+    )
+
+@app.route('/worker/antenatal-checkups')
+@login_required
+@role_required('Healthcare Worker', 'Admin')
+def worker_antenatal_checkups():
+    """Dedicated page displaying only Antenatal Checkups."""
+    from datetime import date, datetime
+    user = get_user_by_id(session['user_id'])
+    all_mothers = get_users_by_role('Mother')
+    today = date.today()
+
+    pregnant_mothers = []
+    t1_count = 0
+    t2_count = 0
+    t3_count = 0
+
+    for m in all_mothers:
+        prof = get_mother_profile(m['id'])
+        if prof and prof['pregnancy_status'] == 'Pregnant':
+            m_dict = dict(m)
+            m_dict['profile'] = dict(prof)
+
+            weeks = 12
+            if prof['lmp']:
+                try:
+                    lmp_d = datetime.strptime(prof['lmp'], '%Y-%m-%d').date()
+                    weeks = max(1, min(42, (today - lmp_d).days // 7))
+                except (ValueError, TypeError):
+                    pass
+            elif prof['edd']:
+                try:
+                    edd_d = datetime.strptime(prof['edd'], '%Y-%m-%d').date()
+                    weeks = max(1, min(42, 40 - ((edd_d - today).days // 7)))
+                except (ValueError, TypeError):
+                    pass
+
+            m_dict['gestational_weeks'] = weeks
+            if weeks <= 12:
+                m_dict['trimester'] = '1st Trimester'
+                t1_count += 1
+            elif weeks <= 27:
+                m_dict['trimester'] = '2nd Trimester'
+                t2_count += 1
+            else:
+                m_dict['trimester'] = '3rd Trimester'
+                t3_count += 1
+
+            pregnant_mothers.append(m_dict)
+
+    anc_stats = {
+        'total': len(pregnant_mothers),
+        'trimester_1': t1_count,
+        'trimester_2': t2_count,
+        'trimester_3': t3_count
+    }
+
+    return render_template(
+        'worker_antenatal.html',
+        user=user,
+        pregnant_mothers=pregnant_mothers,
+        anc_stats=anc_stats
+    )
+
+@app.route('/worker/field-visits', methods=['GET', 'POST'])
+@login_required
+@role_required('Healthcare Worker', 'Admin')
+def worker_field_visits():
+    """Dedicated page displaying only Field Home Visits."""
+    from datetime import date
+    user = get_user_by_id(session['user_id'])
+    today_str = date.today().strftime('%Y-%m-%d')
+    mothers = get_users_by_role('Mother')
+
+    if request.method == 'POST':
+        mother_id = request.form.get('mother_id')
+        visit_date = request.form.get('visit_date', today_str).strip()
+        purpose = request.form.get('purpose', 'Routine Antenatal Checkup').strip()
+        status = request.form.get('status', 'Completed').strip()
+        notes = request.form.get('notes', '').strip()
+
+        if not mother_id:
+            flash('Please select a mother beneficiary for this field visit.', 'danger')
+        else:
+            try:
+                create_field_visit(session['user_id'], int(mother_id), visit_date, purpose, status, notes)
+                flash('Field visit record saved successfully.', 'success')
+            except Exception as e:
+                flash(f'Failed to record visit: {str(e)}', 'danger')
+
+        return redirect(url_for('worker_field_visits'))
+
+    visits = get_field_visits_for_worker(session['user_id'])
+    selected_mother_id = request.args.get('mother_id', type=int)
+    selected_purpose = request.args.get('purpose', '')
+
+    return render_template(
+        'worker_field_visits.html',
+        user=user,
+        visits=visits,
+        mothers=mothers,
+        today_str=today_str,
+        selected_mother_id=selected_mother_id,
+        selected_purpose=selected_purpose
     )
 
 # --- Phase 3 Vaccination Management Routes ---
@@ -1337,6 +1577,102 @@ def chatbot_history_detail(session_id):
         active_session=dict(chat_session),
         messages=messages
     )
+
+
+
+# ==============================================================================
+# Smart Reminders & Clinical Notifications Routes
+# ==============================================================================
+@app.route('/reminders')
+@login_required
+@role_required('Mother')
+def reminders_view():
+    """Smart Reminders & Clinical Notifications Center for mothers."""
+    user_id = session['user_id']
+    user = get_user_by_id(user_id)
+    status_filter = request.args.get('status', 'all')
+    category_filter = request.args.get('category', 'all')
+    child_filter = request.args.get('child_id', 'all')
+
+    reminders_data = get_smart_reminders_for_mother(
+        user_id,
+        status_filter=status_filter,
+        category_filter=category_filter,
+        child_filter=child_filter
+    )
+    return render_template(
+        'reminders.html',
+        user=user,
+        user_role=session.get('user_role', 'Mother'),
+        reminders=reminders_data['items'],
+        all_reminders=reminders_data['all'],
+        counts=reminders_data['counts'],
+        children=reminders_data['children'],
+        active_status=status_filter,
+        active_category=category_filter,
+        active_child=child_filter
+    )
+
+
+@app.route('/reminders/<path:reminder_key>/snooze', methods=['POST'])
+@login_required
+@role_required('Mother')
+def reminders_snooze(reminder_key):
+    """Snoozes a reminder for 1, 3, or 7 days."""
+    user_id = session['user_id']
+    days = request.form.get('days', type=int, default=1)
+    if days not in (1, 3, 7):
+        days = 1
+    snooze_smart_reminder(user_id, reminder_key, days=days)
+    flash(f'Reminder snoozed for {days} day{"s" if days > 1 else ""}.', 'success')
+    return redirect(request.referrer or url_for('reminders_view'))
+
+
+@app.route('/reminders/<path:reminder_key>/complete', methods=['POST'])
+@login_required
+@role_required('Mother')
+def reminders_complete(reminder_key):
+    """Marks a non-vaccine reminder as completed."""
+    user_id = session['user_id']
+    if reminder_key.startswith('vax_'):
+        flash('Immunization doses can only be recorded as administered by a verified Healthcare Worker during your clinical visit.', 'warning')
+        return redirect(request.referrer or url_for('reminders_view'))
+    complete_smart_reminder(user_id, reminder_key)
+    flash('Reminder marked as completed.', 'success')
+    return redirect(request.referrer or url_for('reminders_view'))
+
+
+@app.route('/reminders/custom/create', methods=['POST'])
+@login_required
+@role_required('Mother')
+def reminders_custom_create():
+    """Adds a new custom reminder for the mother."""
+    user_id = session['user_id']
+    title = request.form.get('title', '').strip()
+    description = request.form.get('description', '').strip()
+    due_date = request.form.get('due_date', '').strip()
+    category = request.form.get('category', 'Personal').strip()
+    child_id_raw = request.form.get('child_id', '').strip()
+
+    if not title or not due_date:
+        flash('Please provide both a title and a valid due date for your reminder.', 'danger')
+        return redirect(url_for('reminders_view'))
+
+    child_id = int(child_id_raw) if (child_id_raw and child_id_raw.isdigit()) else None
+    add_custom_reminder(user_id, title, description, due_date, category=category, child_id=child_id)
+    flash('Personal reminder added successfully.', 'success')
+    return redirect(url_for('reminders_view'))
+
+
+@app.route('/reminders/custom/<int:reminder_id>/delete', methods=['POST'])
+@login_required
+@role_required('Mother')
+def reminders_custom_delete(reminder_id):
+    """Deletes a custom reminder owned by the mother."""
+    user_id = session['user_id']
+    delete_custom_reminder(reminder_id, user_id)
+    flash('Personal reminder deleted.', 'success')
+    return redirect(request.referrer or url_for('reminders_view'))
 
 
 # CLI command for admin creation

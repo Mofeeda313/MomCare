@@ -161,31 +161,35 @@ document.addEventListener('DOMContentLoaded', () => {
             if (viewBar) viewBar.style.display = 'flex';
 
             let titleText = '';
+            const navItem = document.querySelector(`.sidebar-nav-item[data-section="${viewKey}"] .nav-text`);
+            if (navItem) {
+                titleText = navItem.textContent.trim();
+            }
 
             if (viewKey === 'children' && childrenSection) {
                 childrenSection.style.display = 'block';
-                titleText = 'Registered Children';
+                if (!titleText) titleText = 'Registered Children';
             } else if (viewKey === 'vaccination' && vaccinationSection) {
                 vaccinationSection.style.display = 'block';
-                titleText = 'Child Immunization Schedule & Records';
+                if (!titleText) titleText = 'Child Immunization Schedule & Records';
             } else if (viewKey === 'growth' && growthSection) {
                 growthSection.style.display = 'block';
-                titleText = 'Child Growth & Development Monitoring';
+                if (!titleText) titleText = 'Child Growth & Development Monitoring';
             } else if (viewKey === 'wellness' && wellnessSection) {
                 if (infoContainer) infoContainer.style.display = 'block';
                 wellnessSection.style.display = 'block';
                 if (communitySection) communitySection.style.display = 'none';
-                titleText = 'Maternal Wellness & Nutrition';
+                if (!titleText) titleText = 'Maternal Wellness & Nutrition';
             } else if (viewKey === 'community' && communitySection) {
                 if (infoContainer) infoContainer.style.display = 'block';
                 if (wellnessSection) wellnessSection.style.display = 'none';
                 communitySection.style.display = 'block';
-                titleText = 'Healthcare Worker / Community Care';
+                if (!titleText) titleText = 'Healthcare Worker / Community Care';
             } else if (viewKey === 'consultation' && communitySection) {
                 if (infoContainer) infoContainer.style.display = 'block';
                 if (wellnessSection) wellnessSection.style.display = 'none';
                 communitySection.style.display = 'block';
-                titleText = 'Health Consultation';
+                if (!titleText) titleText = 'Health Consultation';
                 if (consultationSection) {
                     consultationSection.scrollIntoView({ behavior: 'smooth' });
                 }
@@ -207,7 +211,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sec && document.getElementById('dashboard-overview-container')) {
                 e.preventDefault();
                 window.switchDashboardView(sec);
+            } else {
+                closeSidebar();
             }
+        });
+    });
+
+    // Close sidebar drawer when normal non-section navigation links are clicked
+    document.querySelectorAll('.sidebar-nav-item:not([data-section])').forEach(link => {
+        link.addEventListener('click', () => {
+            closeSidebar();
         });
     });
 

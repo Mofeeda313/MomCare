@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t('Smart Reminders & Notifications') }} - MomCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Collapsible Side Navigation Drawer -->
+    {% include '_sidebar_drawer.html' %}
+
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <button type="button" class="btn-hamburger" id="sidebar-toggle"
+                    aria-label="{{ t('Toggle Navigation Menu') }}" aria-expanded="false"
+                    aria-controls="momcare-sidebar">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="logo">
+                    <a href="{{ url_for('home') }}" class="logo-link">
+                        <span class="logo-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>
+                        </span>
+                        <span class="logo-text">MomCare</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge badge-mother">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    {{ t('Mother') }}
+                </span>
+                <span class="user-greeting-pill">Hi, {{ user['full_name'] }}</span>
+                <a href="{{ url_for('mother_dashboard') }}" class="btn btn-outline btn-sm">{{ t('Dashboard') }}</a>
+                <a href="{{ url_for('chatbot_view') }}" class="btn btn-outline btn-sm">{{ t('Nutrition Chatbot') }}</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">{{ t('Sign Out') }}</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container reminders-page-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Reminders Hero Header -->
+        <div class="reminders-hero-banner">
+            <div class="reminders-hero-content">
+                <div class="reminders-hero-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    {{ t('Smart Reminders & Notifications') }}
+                </div>
+                <h1 class="reminders-hero-title">{{ t('Care Reminders & Clinical Alerts') }}</h1>
+                <p class="reminders-hero-desc">
+                    Personalized proactive tracking for National Immunization Schedule (NIS) doses, WHO pediatric growth checkups, trimester antenatal visits, and custom maternal reminders.
+                </p>
+            </div>
+            <div class="reminders-hero-actions">
+                <button type="button" class="btn btn-primary" id="toggle-add-reminder-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    {{ t('Add Personal Reminder') }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Add Custom Reminder Form Drawer/Panel -->
+        <div class="custom-reminder-form-card" id="add-reminder-panel" style="display: none;">
+            <div class="custom-reminder-form-header">
+                <h3 class="custom-reminder-form-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                    {{ t('Add Personal Reminder') }}
+                </h3>
+                <button type="button" class="btn-close-form" id="close-add-reminder-btn" aria-label="Close Form">&times;</button>
+            </div>
+            <form action="{{ url_for('reminders_custom_create') }}" method="POST" class="custom-reminder-form">
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="reminder-title" class="form-label">Reminder Title <span class="text-danger">*</span></label>
+                        <input type="text" id="reminder-title" name="title" class="form-control" placeholder="e.g. Pick up Iron & Folic Acid tablets" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reminder-due-date" class="form-label">Due Date <span class="text-danger">*</span></label>
+                        <input type="date" id="reminder-due-date" name="due_date" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="reminder-category" class="form-label">Category</label>
+                        <select id="reminder-category" name="category" class="form-control">
+                            <option value="Personal">Personal / Home Task</option>
+                            <option value="Maternal Health">Maternal Health & Checkup</option>
+                            <option value="Child Immunization">Child Immunization Prep</option>
+                            <option value="Growth Monitoring">Pediatric Growth Check</option>
+                            <option value="Wellness & Nutrition">Nutrition & Hydration</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reminder-child" class="form-label">Associated Child (Optional)</label>
+                        <select id="reminder-child" name="child_id" class="form-control">
+                            <option value="">-- General / Maternal --</option>
+                            {% for ch in children %}
+                            <option value="{{ ch.id }}">{{ ch.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reminder-desc" class="form-label">Description / Instructions (Optional)</label>
+                    <textarea id="reminder-desc" name="description" class="form-control" rows="2" placeholder="e.g. Visit local PHC or dispensary after breakfast..."></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem;">
+                    <button type="button" class="btn btn-outline" id="cancel-add-reminder-btn">{{ t('Cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ t('Save Changes') }}</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Metric Stat Cards Row -->
+        <div class="reminders-stats-grid">
+            <a href="{{ url_for('reminders_view', status='all', category=active_category, child_id=active_child) }}"
+                class="rem-stat-card {% if active_status == 'all' %}active-stat-card{% endif %}">
+                <div class="rem-stat-info">
+                    <span class="rem-stat-label">{{ t('All Reminders') }}</span>
+                    <span class="rem-stat-val">{{ counts.all_total }}</span>
+                </div>
+                <div class="rem-stat-icon icon-total">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="{{ url_for('reminders_view', status='overdue', category=active_category, child_id=active_child) }}"
+                class="rem-stat-card {% if active_status == 'overdue' %}active-stat-card{% endif %}">
+                <div class="rem-stat-info">
+                    <span class="rem-stat-label text-overdue">{{ t('Overdue') }}</span>
+                    <span class="rem-stat-val text-overdue">{{ counts.overdue }}</span>
+                </div>
+                <div class="rem-stat-icon icon-overdue">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="{{ url_for('reminders_view', status='today', category=active_category, child_id=active_child) }}"
+                class="rem-stat-card {% if active_status == 'today' %}active-stat-card{% endif %}">
+                <div class="rem-stat-info">
+                    <span class="rem-stat-label text-today">{{ t('Due Today') }}</span>
+                    <span class="rem-stat-val text-today">{{ counts.today }}</span>
+                </div>
+                <div class="rem-stat-icon icon-today">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="{{ url_for('reminders_view', status='upcoming', category=active_category, child_id=active_child) }}"
+                class="rem-stat-card {% if active_status == 'upcoming' %}active-stat-card{% endif %}">
+                <div class="rem-stat-info">
+                    <span class="rem-stat-label text-upcoming">{{ t('Upcoming') }}</span>
+                    <span class="rem-stat-val text-upcoming">{{ counts.upcoming }}</span>
+                </div>
+                <div class="rem-stat-icon icon-upcoming">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="{{ url_for('reminders_view', status='snoozed', category=active_category, child_id=active_child) }}"
+                class="rem-stat-card {% if active_status == 'snoozed' %}active-stat-card{% endif %}">
+                <div class="rem-stat-info">
+                    <span class="rem-stat-label text-snoozed">{{ t('Snoozed') }}</span>
+                    <span class="rem-stat-val text-snoozed">{{ counts.snoozed }}</span>
+                </div>
+                <div class="rem-stat-icon icon-snoozed">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 8 14"></polyline>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="{{ url_for('reminders_view', status='completed', category=active_category, child_id=active_child) }}"
+                class="rem-stat-card {% if active_status == 'completed' %}active-stat-card{% endif %}">
+                <div class="rem-stat-info">
+                    <span class="rem-stat-label text-completed">{{ t('Completed') }}</span>
+                    <span class="rem-stat-val text-completed">{{ counts.completed }}</span>
+                </div>
+                <div class="rem-stat-icon icon-completed">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+            </a>
+        </div>
+
+        <!-- Filter Controls Bar -->
+        <div class="reminders-controls-card">
+            <!-- Status Tabs -->
+            <div class="reminders-tabs-nav">
+                <a href="{{ url_for('reminders_view', status='all', category=active_category, child_id=active_child) }}"
+                    class="rem-tab-link {% if active_status == 'all' %}active{% endif %}">
+                    {{ t('All Reminders') }} ({{ counts.all_total }})
+                </a>
+                <a href="{{ url_for('reminders_view', status='overdue', category=active_category, child_id=active_child) }}"
+                    class="rem-tab-link tab-overdue {% if active_status == 'overdue' %}active{% endif %}">
+                    {{ t('Overdue') }} ({{ counts.overdue }})
+                </a>
+                <a href="{{ url_for('reminders_view', status='today', category=active_category, child_id=active_child) }}"
+                    class="rem-tab-link tab-today {% if active_status == 'today' %}active{% endif %}">
+                    {{ t('Due Today') }} ({{ counts.today }})
+                </a>
+                <a href="{{ url_for('reminders_view', status='upcoming', category=active_category, child_id=active_child) }}"
+                    class="rem-tab-link tab-upcoming {% if active_status == 'upcoming' %}active{% endif %}">
+                    {{ t('Upcoming') }} ({{ counts.upcoming }})
+                </a>
+                <a href="{{ url_for('reminders_view', status='snoozed', category=active_category, child_id=active_child) }}"
+                    class="rem-tab-link tab-snoozed {% if active_status == 'snoozed' %}active{% endif %}">
+                    {{ t('Snoozed') }} ({{ counts.snoozed }})
+                </a>
+                <a href="{{ url_for('reminders_view', status='completed', category=active_category, child_id=active_child) }}"
+                    class="rem-tab-link tab-completed {% if active_status == 'completed' %}active{% endif %}">
+                    {{ t('Completed') }} ({{ counts.completed }})
+                </a>
+            </div>
+
+            <!-- Dropdown Filters: Child & Category -->
+            <form method="GET" action="{{ url_for('reminders_view') }}" class="reminders-dropdown-filters">
+                <input type="hidden" name="status" value="{{ active_status }}">
+
+                <div class="rem-filter-group">
+                    <label for="filter-child" class="rem-filter-label">Filter Child:</label>
+                    <select id="filter-child" name="child_id" class="rem-select" onchange="this.form.submit()">
+                        <option value="all" {% if active_child == 'all' %}selected{% endif %}>All Care Recipients</option>
+                        <option value="maternal" {% if active_child == 'maternal' %}selected{% endif %}>Maternal Only</option>
+                        {% for ch in children %}
+                        <option value="{{ ch.id }}" {% if active_child|string == ch.id|string %}selected{% endif %}>{{ ch.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="rem-filter-group">
+                    <label for="filter-category" class="rem-filter-label">Category:</label>
+                    <select id="filter-category" name="category" class="rem-select" onchange="this.form.submit()">
+                        <option value="all" {% if active_category == 'all' %}selected{% endif %}>All Categories</option>
+                        <option value="Child Immunization" {% if active_category == 'Child Immunization' %}selected{% endif %}>Child Immunization</option>
+                        <option value="Growth Monitoring" {% if active_category == 'Growth Monitoring' %}selected{% endif %}>Growth Monitoring</option>
+                        <option value="Maternal Health" {% if active_category == 'Maternal Health' %}selected{% endif %}>Maternal Health</option>
+                        <option value="Wellness & Nutrition" {% if active_category == 'Wellness & Nutrition' %}selected{% endif %}>Wellness & Nutrition</option>
+                        <option value="Personal" {% if active_category == 'Personal' %}selected{% endif %}>Personal Reminders</option>
+                    </select>
+                </div>
+
+                {% if active_status != 'all' or active_category != 'all' or active_child != 'all' %}
+                <a href="{{ url_for('reminders_view') }}" class="btn btn-outline btn-xs btn-clear-filters">
+                    Clear Filters
+                </a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Reminders List -->
+        <div class="reminders-list-container">
+            {% if reminders and reminders|length > 0 %}
+                {% for r in reminders %}
+                <div class="reminder-card reminder-card-{{ r.status|lower }} {% if r.status == 'Completed' %}is-completed{% endif %}">
+                    <!-- Left Color Accent Bar is handled via CSS border/accent -->
+                    <div class="reminder-card-main">
+                        <div class="reminder-card-topbar">
+                            <div class="reminder-badges-group">
+                                <!-- Status Badge -->
+                                <span class="rem-badge rem-badge-{{ r.status|lower }}">
+                                    {% if r.status == 'Overdue' %}
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                    {% elif r.status == 'Today' %}
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    {% elif r.status == 'Completed' %}
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    {% elif r.status == 'Snoozed' %}
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 8 14"></polyline></svg>
+                                    {% else %}
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                                    {% endif %}
+                                    {{ t(r.status) }}
+                                </span>
+
+                                <!-- Category Badge -->
+                                <span class="rem-category-pill">
+                                    {{ t(r.category) }}
+                                </span>
+
+                                <!-- Child Badge if applicable -->
+                                {% if r.child_name %}
+                                <span class="rem-child-pill">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                                    {{ r.child_name }}
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="reminder-date-info">
+                                <span class="rem-due-date">Due: <strong>{{ r.due_date }}</strong></span>
+                                <span class="rem-relative-time rem-rel-{{ r.status|lower }}">{{ r.relative_time }}</span>
+                            </div>
+                        </div>
+
+                        <div class="reminder-card-body">
+                            <h3 class="reminder-card-title">{{ r.title }}</h3>
+                            <p class="reminder-card-desc">{{ r.description }}</p>
+                        </div>
+
+                        <div class="reminder-card-footer">
+                            <div class="reminder-footer-left">
+                                {% if r.type == 'Immunization' %}
+                                <span class="clinical-note">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                    Administered doses are verified by your healthcare provider.
+                                </span>
+                                {% elif r.completed_at %}
+                                <span class="completed-note">
+                                    Completed: {{ r.completed_at[:10] }}
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="reminder-actions-group">
+                                <!-- Action URL Link -->
+                                {% if r.action_url %}
+                                <a href="{{ r.action_url }}" class="btn btn-outline btn-xs">
+                                    {{ r.action_label or 'View Details' }}
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                </a>
+                                {% endif %}
+
+                                <!-- Snooze Dropdown / Actions -->
+                                {% if r.can_snooze %}
+                                <div class="snooze-dropdown-wrapper">
+                                    <button type="button" class="btn btn-outline btn-xs snooze-btn" onclick="toggleSnoozeMenu('{{ r.key }}')">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 8 14"></polyline></svg>
+                                        {{ t('Snooze') }}
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                    </button>
+                                    <div class="snooze-menu" id="snooze-menu-{{ r.key }}">
+                                        <form action="{{ url_for('reminders_snooze', reminder_key=r.key) }}" method="POST">
+                                            <input type="hidden" name="days" value="1">
+                                            <button type="submit" class="snooze-option">Snooze 1 Day</button>
+                                        </form>
+                                        <form action="{{ url_for('reminders_snooze', reminder_key=r.key) }}" method="POST">
+                                            <input type="hidden" name="days" value="3">
+                                            <button type="submit" class="snooze-option">Snooze 3 Days</button>
+                                        </form>
+                                        <form action="{{ url_for('reminders_snooze', reminder_key=r.key) }}" method="POST">
+                                            <input type="hidden" name="days" value="7">
+                                            <button type="submit" class="snooze-option">Snooze 7 Days</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Mark Complete Action (non-vaccine only) -->
+                                {% if r.can_complete %}
+                                <form action="{{ url_for('reminders_complete', reminder_key=r.key) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-primary btn-xs">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        {{ t('Mark Complete') }}
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <!-- Delete Action (Custom reminders only) -->
+                                {% if r.can_delete %}
+                                <form action="{{ url_for('reminders_custom_delete', reminder_id=r.id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Delete this personal reminder?');">
+                                    <button type="submit" class="btn btn-secondary-outline btn-xs" title="Delete Reminder">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                        {{ t('Delete') }}
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Empty State -->
+                <div class="reminders-empty-card">
+                    <div class="empty-icon-circle">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="empty-title">No Reminders Found</h3>
+                    <p class="empty-desc">
+                        {% if active_status != 'all' or active_category != 'all' or active_child != 'all' %}
+                        There are no reminders matching your current filter criteria.
+                        {% else %}
+                        Great job! All immunization milestones, clinical checkups, and care reminders are completely up to date.
+                        {% endif %}
+                    </p>
+                    <div style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 1rem;">
+                        {% if active_status != 'all' or active_category != 'all' or active_child != 'all' %}
+                        <a href="{{ url_for('reminders_view') }}" class="btn btn-outline btn-sm">Clear All Filters</a>
+                        {% endif %}
+                        <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('toggle-add-reminder-btn').click();">
+                            Add Personal Reminder
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Logged in as {{ user['full_name'] }} (Mother).</p>
+            <p class="footer-note">Proactive Maternal & Pediatric Health Protection</p>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Toggle Custom Reminder Form
+        const toggleBtn = document.getElementById('toggle-add-reminder-btn');
+        const closeBtn = document.getElementById('close-add-reminder-btn');
+        const cancelBtn = document.getElementById('cancel-add-reminder-btn');
+        const formPanel = document.getElementById('add-reminder-panel');
+
+        function openReminderForm() {
+            if (formPanel) {
+                formPanel.style.display = 'block';
+                formPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                const titleInput = document.getElementById('reminder-title');
+                if (titleInput) titleInput.focus();
+            }
+        }
+
+        function closeReminderForm() {
+            if (formPanel) {
+                formPanel.style.display = 'none';
+            }
+        }
+
+        if (toggleBtn) toggleBtn.addEventListener('click', () => {
+            if (formPanel.style.display === 'none' || !formPanel.style.display) {
+                openReminderForm();
+            } else {
+                closeReminderForm();
+            }
+        });
+        if (closeBtn) closeBtn.addEventListener('click', closeReminderForm);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeReminderForm);
+
+        // Snooze Dropdown toggle
+        function toggleSnoozeMenu(key) {
+            const menu = document.getElementById('snooze-menu-' + key);
+            if (!menu) return;
+            const isOpen = menu.classList.contains('show');
+            document.querySelectorAll('.snooze-menu').forEach(m => m.classList.remove('show'));
+            if (!isOpen) {
+                menu.classList.add('show');
+            }
+        }
+
+        // Close snooze menu when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.snooze-dropdown-wrapper')) {
+                document.querySelectorAll('.snooze-menu').forEach(m => m.classList.remove('show'));
+            }
+        });
+    </script>
+</body>
+
+</html>

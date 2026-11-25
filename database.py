@@ -222,6 +222,58 @@ def init_db():
         )
     ''')
 
+    # Smart Reminders & Notifications – reminder action logs (snooze, complete for dynamic reminders)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS reminder_actions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            reminder_key TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'Pending',
+            snoozed_until TEXT,
+            completed_at TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, reminder_key),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    ''')
+
+    # Smart Reminders & Notifications – custom user-created reminders
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS custom_reminders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            child_id INTEGER,
+            title TEXT NOT NULL,
+            description TEXT,
+            due_date TEXT NOT NULL,
+            category TEXT NOT NULL DEFAULT 'Personal',
+            status TEXT NOT NULL DEFAULT 'Pending',
+            snoozed_until TEXT,
+            completed_at TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (child_id) REFERENCES child_profiles(id) ON DELETE SET NULL
+        )
+    ''')
+
+    # Healthcare Worker Field Home Visits & Maternal Community Care
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS field_visits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            worker_id INTEGER NOT NULL,
+            mother_id INTEGER NOT NULL,
+            visit_date TEXT NOT NULL,
+            purpose TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'Completed',
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (worker_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (mother_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    ''')
+
     conn.commit()
     conn.close()
 
@@ -799,13 +851,13 @@ def generate_child_vaccination_schedule(child_id):
         existing = existing_map.get(code)
 
         # Determine real-time status
-        if existing and existing.get('administered_date'):
+        if existing and (existing.get('administered_date') or existing.get('status') == 'Completed'):
             status = 'Completed'
-            admin_date = existing['administered_date']
-            admin_by_id = existing['administered_by_id']
-            admin_by_name = existing['administered_by_name']
-            notes = existing['notes']
-            batch_num = existing['batch_number']
+            admin_date = existing.get('administered_date') or rec_date_str
+            admin_by_id = existing.get('administered_by_id')
+            admin_by_name = existing.get('administered_by_name')
+            notes = existing.get('notes')
+            batch_num = existing.get('batch_number')
             record_id = existing['id']
         else:
             admin_date = None
@@ -836,7 +888,7 @@ def generate_child_vaccination_schedule(child_id):
                 rec_date_str, status, item['category']
             ))
             record_id = cursor.lastrowid
-        elif existing.get('status') != status and not existing.get('administered_date'):
+        elif existing.get('status') != status and not existing.get('administered_date') and existing.get('status') != 'Completed':
             cursor.execute('''
                 UPDATE vaccination_records
                 SET status = ?, recommended_date = ?
@@ -936,6 +988,12 @@ def record_vaccination(child_id, vaccine_code, administered_date, administered_b
             prev_status, 'Completed', administered_by_name.strip(),
             change_reason.strip() if change_reason else 'Clinical dose administration'
         ))
+
+        # Synchronize reminder_actions so no conflicting stale pending or snoozed record lingers
+        cursor.execute('''
+            DELETE FROM reminder_actions
+            WHERE reminder_key LIKE ?
+        ''', (f"vax_{child_id}_{vaccine_code}_%",))
     else:
         # Search item in NIS_VACCINE_SCHEDULE
         meta = next((item for item in NIS_VACCINE_SCHEDULE if item['code'] == vaccine_code), None)
@@ -967,6 +1025,12 @@ def record_vaccination(child_id, vaccine_code, administered_date, administered_b
             record_id, child_id, administered_date.strip(),
             administered_by_name.strip(), change_reason.strip() if change_reason else 'New vaccination record'
         ))
+
+        # Synchronize reminder_actions so no conflicting stale pending or snoozed record lingers
+        cursor.execute('''
+            DELETE FROM reminder_actions
+            WHERE reminder_key LIKE ?
+        ''', (f"vax_{child_id}_{vaccine_code}_%",))
 
     conn.commit()
     return True
@@ -2006,4 +2070,507 @@ def close_chat_session(session_id, user_id):
         (session_id, user_id)
     )
     conn.commit()
+
+
+# ==============================================================================
+# Smart Reminders & Notifications System
+# ==============================================================================
+
+def add_custom_reminder(user_id, title, description, due_date, category='Personal', child_id=None):
+    """Creates a custom user reminder for a mother."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO custom_reminders (user_id, child_id, title, description, due_date, category, status)
+        VALUES (?, ?, ?, ?, ?, ?, 'Pending')
+    ''', (user_id, child_id if child_id else None, title.strip(), (description or '').strip(), due_date, category))
+    conn.commit()
+    return cursor.lastrowid
+
+
+def delete_custom_reminder(reminder_id, user_id):
+    """Deletes a custom reminder belonging to a user."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        DELETE FROM custom_reminders WHERE id = ? AND user_id = ?
+    ''', (reminder_id, user_id))
+    conn.commit()
+    return cursor.rowcount > 0
+
+
+def snooze_smart_reminder(user_id, reminder_key, days=1):
+    """Snoozes any reminder (dynamic or custom) until date.today() + days."""
+    snoozed_until = (date.today() + timedelta(days=days)).strftime('%Y-%m-%d')
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if reminder_key.startswith('custom_'):
+        try:
+            custom_id = int(reminder_key.replace('custom_', ''))
+            cursor.execute('''
+                UPDATE custom_reminders 
+                SET status = 'Snoozed', snoozed_until = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ? AND user_id = ?
+            ''', (snoozed_until, custom_id, user_id))
+            conn.commit()
+            return snoozed_until
+        except (ValueError, TypeError):
+            pass
+
+    # Dynamic reminder: upsert into reminder_actions
+    cursor.execute('''
+        INSERT INTO reminder_actions (user_id, reminder_key, status, snoozed_until, updated_at)
+        VALUES (?, ?, 'Snoozed', ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(user_id, reminder_key) DO UPDATE SET
+            status = 'Snoozed',
+            snoozed_until = excluded.snoozed_until,
+            updated_at = CURRENT_TIMESTAMP
+    ''', (user_id, reminder_key, snoozed_until))
+    conn.commit()
+    return snoozed_until
+
+
+def complete_smart_reminder(user_id, reminder_key):
+    """Marks a non-vaccine reminder as completed."""
+    now_ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    conn = get_db()
+    cursor = conn.cursor()
+
+    if reminder_key.startswith('custom_'):
+        try:
+            custom_id = int(reminder_key.replace('custom_', ''))
+            cursor.execute('''
+                UPDATE custom_reminders 
+                SET status = 'Completed', completed_at = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ? AND user_id = ?
+            ''', (now_ts, custom_id, user_id))
+            conn.commit()
+            return True
+        except (ValueError, TypeError):
+            pass
+
+    # Dynamic reminder: upsert into reminder_actions
+    cursor.execute('''
+        INSERT INTO reminder_actions (user_id, reminder_key, status, completed_at, updated_at)
+        VALUES (?, ?, 'Completed', ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(user_id, reminder_key) DO UPDATE SET
+            status = 'Completed',
+            completed_at = excluded.completed_at,
+            snoozed_until = NULL,
+            updated_at = CURRENT_TIMESTAMP
+    ''', (user_id, reminder_key, now_ts))
+    conn.commit()
+    return True
+
+
+def get_smart_reminders_for_mother(mother_id, status_filter=None, category_filter=None, child_filter=None):
+    """
+    Dynamically generates, aggregates, and categorizes all smart reminders for a mother across:
+      1. Child Immunization (Upcoming, Due Today, Overdue, Completed)
+      2. Child Growth Monitoring (Clinical follow-ups, routine checks)
+      3. Maternal Health & Wellness (ANC trimesters, EDD delivery check, PNC visits, daily hydration/nutrition)
+      4. Custom Reminders created by the mother
+    """
+    today = date.today()
+    today_str = today.strftime('%Y-%m-%d')
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # 1. Fetch persistent action states
+    cursor.execute('SELECT * FROM reminder_actions WHERE user_id = ?', (mother_id,))
+    actions_map = {row['reminder_key']: dict(row) for row in cursor.fetchall()}
+
+    # 2. Fetch mother profile & registered children
+    raw_profile = get_mother_profile(mother_id)
+    profile = dict(raw_profile) if raw_profile else None
+    children = get_children_by_mother(mother_id)
+    children_map = {c['id']: c for c in children}
+
+    all_reminders = []
+
+    # --------------------------------------------------------------------------
+    # A. Custom Reminders
+    # --------------------------------------------------------------------------
+    cursor.execute('SELECT * FROM custom_reminders WHERE user_id = ? ORDER BY due_date ASC', (mother_id,))
+    for cr in cursor.fetchall():
+        cr_dict = dict(cr)
+        key = f"custom_{cr_dict['id']}"
+        ch_name = children_map[cr_dict['child_id']]['full_name'] if cr_dict['child_id'] in children_map else None
+        due_d_str = cr_dict['due_date']
+
+        if cr_dict['status'] == 'Completed':
+            st = 'Completed'
+        elif cr_dict['snoozed_until'] and cr_dict['snoozed_until'] > today_str:
+            st = 'Snoozed'
+        elif due_d_str < today_str:
+            st = 'Overdue'
+        elif due_d_str == today_str:
+            st = 'Today'
+        else:
+            st = 'Upcoming'
+
+        all_reminders.append({
+            'key': key,
+            'id': cr_dict['id'],
+            'type': 'Custom',
+            'category': cr_dict['category'] or 'Personal',
+            'title': cr_dict['title'],
+            'description': cr_dict['description'] or '',
+            'child_id': cr_dict['child_id'],
+            'child_name': ch_name,
+            'due_date': due_d_str,
+            'original_due_date': due_d_str,
+            'status': st,
+            'snoozed_until': cr_dict['snoozed_until'],
+            'completed_at': cr_dict['completed_at'],
+            'can_complete': st != 'Completed',
+            'can_snooze': st != 'Completed',
+            'can_delete': True,
+            'action_url': None,
+            'action_label': None,
+            'icon_type': 'calendar'
+        })
+
+    # --------------------------------------------------------------------------
+    # B. Child Immunization Reminders
+    # --------------------------------------------------------------------------
+    for ch in children:
+        schedule = generate_child_vaccination_schedule(ch['id'])
+        for vax in schedule:
+            key = f"vax_{ch['id']}_{vax['vaccine_code']}_{vax['dose_number']}"
+            action = actions_map.get(key)
+            rec_date_str = vax['recommended_date']
+
+            if vax['status'] == 'Completed':
+                st = 'Completed'
+                display_date = vax.get('administered_date') or rec_date_str
+                desc = f"Administered on {vax.get('administered_date') or rec_date_str} by {vax.get('administered_by_name') or 'Clinician'}."
+            elif action and action['snoozed_until'] and action['snoozed_until'] > today_str:
+                st = 'Snoozed'
+                display_date = rec_date_str
+                desc = f"National Immunization Schedule (NIS) dose. Snoozed until {action['snoozed_until']}."
+            elif vax['status'] == 'Overdue':
+                st = 'Overdue'
+                display_date = rec_date_str
+                desc = f"Scheduled for age {vax['recommended_age']}. Action recommended: Visit your community healthcare worker or PHC to receive this vaccination."
+            elif vax['status'] == 'Due' or rec_date_str == today_str:
+                st = 'Today'
+                display_date = rec_date_str
+                desc = f"Active vaccination window ({vax['recommended_age']}). Community immunization visits available."
+            else:
+                st = 'Upcoming'
+                display_date = rec_date_str
+                desc = f"Scheduled for age {vax['recommended_age']} adhering to India's National Immunization Schedule."
+
+            all_reminders.append({
+                'key': key,
+                'id': vax.get('record_id') or key,
+                'type': 'Immunization',
+                'category': 'Child Immunization',
+                'title': f"{vax['vaccine_name']} ({vax['dose_number']})",
+                'description': desc,
+                'child_id': ch['id'],
+                'child_name': ch['full_name'],
+                'due_date': display_date,
+                'original_due_date': rec_date_str,
+                'status': st,
+                'snoozed_until': action['snoozed_until'] if (action and action['snoozed_until']) else None,
+                'completed_at': vax.get('administered_date'),
+                'can_complete': False,  # Mother cannot mark vaccine as administered
+                'can_snooze': st != 'Completed',
+                'can_delete': False,
+                'action_url': f"/vaccination/child/{ch['id']}",
+                'action_label': 'View Schedule',
+                'icon_type': 'syringe'
+            })
+
+    # --------------------------------------------------------------------------
+    # C. Child Growth Monitoring Reminders
+    # --------------------------------------------------------------------------
+    for ch in children:
+        raw_growth = get_latest_growth_measurement(ch['id'])
+        latest_growth = dict(raw_growth) if raw_growth else None
+        if latest_growth and latest_growth.get('needs_followup'):
+            key = f"growth_followup_{ch['id']}_{latest_growth['id']}"
+            action = actions_map.get(key)
+            try:
+                meas_d = datetime.strptime(latest_growth['measurement_date'], '%Y-%m-%d').date()
+                followup_date_str = (meas_d + timedelta(days=14)).strftime('%Y-%m-%d')
+            except (ValueError, TypeError):
+                followup_date_str = today_str
+
+            if action and action['status'] == 'Completed':
+                st = 'Completed'
+            elif action and action['snoozed_until'] and action['snoozed_until'] > today_str:
+                st = 'Snoozed'
+            elif followup_date_str < today_str:
+                st = 'Overdue'
+            elif followup_date_str == today_str:
+                st = 'Today'
+            else:
+                st = 'Upcoming'
+
+            obs = f": \"{latest_growth['observations']}\"" if latest_growth.get('observations') else ''
+            all_reminders.append({
+                'key': key,
+                'id': key,
+                'type': 'Growth Monitoring',
+                'category': 'Growth Monitoring',
+                'title': f"Pediatric Growth Follow-up: {ch['full_name']}",
+                'description': f"Clinical assessment noted {latest_growth['who_status']} ({latest_growth['status_summary']}){obs}. Follow-up measurement advised.",
+                'child_id': ch['id'],
+                'child_name': ch['full_name'],
+                'due_date': followup_date_str,
+                'original_due_date': followup_date_str,
+                'status': st,
+                'snoozed_until': action['snoozed_until'] if (action and action['snoozed_until']) else None,
+                'completed_at': action['completed_at'] if (action and action['completed_at']) else None,
+                'can_complete': st != 'Completed',
+                'can_snooze': st != 'Completed',
+                'can_delete': False,
+                'action_url': f"/growth/child/{ch['id']}",
+                'action_label': 'View Growth Charts',
+                'icon_type': 'activity'
+            })
+
+    # --------------------------------------------------------------------------
+    # D. Maternal Health & Prenatal / Postnatal Reminders
+    # --------------------------------------------------------------------------
+    if profile:
+        preg_status = profile.get('pregnancy_status')
+        if preg_status == 'Pregnant' and profile.get('edd'):
+            try:
+                edd_date = datetime.strptime(profile['edd'], '%Y-%m-%d').date()
+                lmp_date = edd_date - timedelta(days=280)
+                anc_milestones = [
+                    ('anc_1', 'Antenatal Checkup 1 (1st Trimester)', 'Initial clinical screening, registration, routine blood tests, and ultrasound.', lmp_date + timedelta(weeks=10)),
+                    ('anc_2', 'Antenatal Checkup 2 (2nd Trimester)', 'Anomaly scan, maternal blood pressure check, and tetanus/Td vaccination.', lmp_date + timedelta(weeks=20)),
+                    ('anc_3', 'Antenatal Checkup 3 (3rd Trimester)', 'Growth velocity review, fetal heartbeat monitoring, and hemoglobin test.', lmp_date + timedelta(weeks=30)),
+                    ('anc_4', 'Antenatal Checkup 4 (Pre-delivery Checkup)', 'Delivery plan discussion, hospital readiness, and maternal vitals examination.', lmp_date + timedelta(weeks=36)),
+                    ('delivery', 'Expected Delivery Preparation', 'Expected Date of Delivery (EDD). Hospital bag readiness and emergency contacts confirmation.', edd_date)
+                ]
+
+                for m_id, m_title, m_desc, m_date in anc_milestones:
+                    key = f"{m_id}_{profile['id']}"
+                    action = actions_map.get(key)
+                    m_date_str = m_date.strftime('%Y-%m-%d')
+
+                    if action and action['status'] == 'Completed':
+                        st = 'Completed'
+                    elif action and action['snoozed_until'] and action['snoozed_until'] > today_str:
+                        st = 'Snoozed'
+                    elif m_date_str < today_str:
+                        st = 'Overdue'
+                    elif m_date_str == today_str:
+                        st = 'Today'
+                    else:
+                        st = 'Upcoming'
+
+                    all_reminders.append({
+                        'key': key,
+                        'id': key,
+                        'type': 'Maternal Health',
+                        'category': 'Maternal Health',
+                        'title': m_title,
+                        'description': m_desc,
+                        'child_id': None,
+                        'child_name': None,
+                        'due_date': m_date_str,
+                        'original_due_date': m_date_str,
+                        'status': st,
+                        'snoozed_until': action['snoozed_until'] if (action and action['snoozed_until']) else None,
+                        'completed_at': action['completed_at'] if (action and action['completed_at']) else None,
+                        'can_complete': st != 'Completed',
+                        'can_snooze': st != 'Completed',
+                        'can_delete': False,
+                        'action_url': '/profile/mother',
+                        'action_label': 'View Profile',
+                        'icon_type': 'heart'
+                    })
+            except (ValueError, TypeError):
+                pass
+
+        elif preg_status == 'Postnatal':
+            pnc_milestones = [
+                ('pnc_1', 'Postnatal Care Checkup (Week 1)', 'Maternal healing assessment, infant feeding evaluation, and clinical recovery check.', today - timedelta(days=2)),
+                ('pnc_2', 'Postnatal Health Examination (Week 6)', 'Comprehensive 6-week postnatal checkup, mental wellness, and infant developmental review.', today + timedelta(days=20))
+            ]
+            for p_id, p_title, p_desc, p_date in pnc_milestones:
+                key = f"{p_id}_{profile['id']}"
+                action = actions_map.get(key)
+                p_date_str = p_date.strftime('%Y-%m-%d')
+
+                if action and action['status'] == 'Completed':
+                    st = 'Completed'
+                elif action and action['snoozed_until'] and action['snoozed_until'] > today_str:
+                    st = 'Snoozed'
+                elif p_date_str < today_str:
+                    st = 'Overdue'
+                elif p_date_str == today_str:
+                    st = 'Today'
+                else:
+                    st = 'Upcoming'
+
+                all_reminders.append({
+                    'key': key,
+                    'id': key,
+                    'type': 'Maternal Health',
+                    'category': 'Maternal Health',
+                    'title': p_title,
+                    'description': p_desc,
+                    'child_id': None,
+                    'child_name': None,
+                    'due_date': p_date_str,
+                    'original_due_date': p_date_str,
+                    'status': st,
+                    'snoozed_until': action['snoozed_until'] if (action and action['snoozed_until']) else None,
+                    'completed_at': action['completed_at'] if (action and action['completed_at']) else None,
+                    'can_complete': st != 'Completed',
+                    'can_snooze': st != 'Completed',
+                    'can_delete': False,
+                    'action_url': '/profile/mother',
+                    'action_label': 'View Profile',
+                    'icon_type': 'heart'
+                })
+
+        # Daily Nutrition & Hydration Tip/Reminder
+        daily_key = f"wellness_nutrition_{today_str}_{mother_id}"
+        daily_action = actions_map.get(daily_key)
+        daily_status = 'Completed' if (daily_action and daily_action['status'] == 'Completed') else 'Today'
+        all_reminders.append({
+            'key': daily_key,
+            'id': daily_key,
+            'type': 'Wellness & Nutrition',
+            'category': 'Wellness & Nutrition',
+            'title': 'Daily Hydration & Nutritional Care',
+            'description': 'Remember to drink 8-10 glasses of water daily and consume iron-rich leafy greens, pulses, and recommended vitamins.',
+            'child_id': None,
+            'child_name': None,
+            'due_date': today_str,
+            'original_due_date': today_str,
+            'status': daily_status,
+            'snoozed_until': None,
+            'completed_at': daily_action['completed_at'] if (daily_action and daily_action['completed_at']) else None,
+            'can_complete': daily_status != 'Completed',
+            'can_snooze': False,
+            'can_delete': False,
+            'action_url': '/chatbot',
+            'action_label': 'Consult Nutrition Chatbot',
+            'icon_type': 'sun'
+        })
+
+    # --------------------------------------------------------------------------
+    # E. Helper Calculations & Relative Date Strings
+    # --------------------------------------------------------------------------
+    for r in all_reminders:
+        try:
+            r_d = datetime.strptime(r['due_date'], '%Y-%m-%d').date()
+            delta_days = (r_d - today).days
+            if r['status'] == 'Completed':
+                r['relative_time'] = f"Completed"
+            elif r['status'] == 'Snoozed':
+                r['relative_time'] = f"Snoozed until {r['snoozed_until']}"
+            elif delta_days < 0:
+                abs_days = abs(delta_days)
+                r['relative_time'] = f"Overdue by {abs_days} day{'s' if abs_days != 1 else ''}"
+            elif delta_days == 0:
+                r['relative_time'] = "Due Today"
+            elif delta_days == 1:
+                r['relative_time'] = "Due Tomorrow"
+            else:
+                r['relative_time'] = f"Due in {delta_days} days"
+        except (ValueError, TypeError):
+            r['relative_time'] = r['due_date']
+
+    # Sort reminders: Overdue first (oldest first), Today, Upcoming (soonest first), Snoozed, Completed (newest first)
+    status_order = {'Overdue': 0, 'Today': 1, 'Upcoming': 2, 'Snoozed': 3, 'Completed': 4}
+    all_reminders.sort(key=lambda r: (
+        status_order.get(r['status'], 5),
+        -datetime.strptime(r['due_date'], '%Y-%m-%d').toordinal() if r['status'] == 'Completed' else datetime.strptime(r['due_date'], '%Y-%m-%d').toordinal()
+    ))
+
+    # 1. Apply Child Scope / Filter
+    scoped = all_reminders
+    if child_filter and str(child_filter).lower() != 'all':
+        if str(child_filter).lower() == 'maternal':
+            scoped = [r for r in scoped if r['child_id'] is None]
+        else:
+            try:
+                ch_id_int = int(child_filter)
+                scoped = [r for r in scoped if r['child_id'] == ch_id_int]
+            except ValueError:
+                pass
+
+    # 2. Apply Category Scope if specified
+    if category_filter and str(category_filter).lower() != 'all':
+        cf = str(category_filter).lower()
+        scoped = [r for r in scoped if cf in r['category'].lower() or cf in r['type'].lower()]
+
+    # 3. Calculate Summary Counts for the current child & category scope
+    counts = {
+        'total': len([r for r in scoped if r['status'] != 'Completed']),
+        'all_total': len(scoped),
+        'overdue': len([r for r in scoped if r['status'] == 'Overdue']),
+        'today': len([r for r in scoped if r['status'] == 'Today']),
+        'upcoming': len([r for r in scoped if r['status'] == 'Upcoming']),
+        'completed': len([r for r in scoped if r['status'] == 'Completed']),
+        'snoozed': len([r for r in scoped if r['status'] == 'Snoozed'])
+    }
+
+    # Global summary counts across ALL children and maternal tasks
+    global_counts = {
+        'total': len([r for r in all_reminders if r['status'] != 'Completed']),
+        'all_total': len(all_reminders),
+        'overdue': len([r for r in all_reminders if r['status'] == 'Overdue']),
+        'today': len([r for r in all_reminders if r['status'] == 'Today']),
+        'upcoming': len([r for r in all_reminders if r['status'] == 'Upcoming']),
+        'completed': len([r for r in all_reminders if r['status'] == 'Completed']),
+        'snoozed': len([r for r in all_reminders if r['status'] == 'Snoozed'])
+    }
+
+    # 4. Apply Status Filter for final displayed items
+    filtered = scoped
+    if status_filter and str(status_filter).lower() != 'all':
+        sf = str(status_filter).lower()
+        filtered = [r for r in filtered if r['status'].lower() == sf]
+
+    return {
+        'items': filtered,
+        'all': all_reminders,
+        'scoped': scoped,
+        'counts': counts,
+        'global_counts': global_counts,
+        'children': children,
+        'mother_profile': profile
+    }
+
+# --------------------------------------------------------------------------
+# Healthcare Worker Field Home Visits & Community Care Helpers
+# --------------------------------------------------------------------------
+def create_field_visit(worker_id, mother_id, visit_date, purpose, status='Completed', notes=None):
+    """Logs a new field home visit performed by a healthcare worker."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO field_visits (worker_id, mother_id, visit_date, purpose, status, notes)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (worker_id, mother_id, visit_date, purpose, status, notes.strip() if notes else None))
+    conn.commit()
+    return cursor.lastrowid
+
+def get_field_visits_for_worker(worker_id=None):
+    """Retrieves field home visits with mother details."""
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT fv.*, u.full_name as mother_name, u.phone as mother_phone, u.email as mother_email
+        FROM field_visits fv
+        JOIN users u ON fv.mother_id = u.id
+        ORDER BY fv.visit_date DESC, fv.created_at DESC
+    ''')
+    rows = cursor.fetchall()
+    return [dict(r) for r in rows]
+
+
 

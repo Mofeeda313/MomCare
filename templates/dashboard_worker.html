@@ -14,86 +14,101 @@
 </head>
 
 <body class="dashboard-body">
+    <!-- Collapsible Side Navigation Drawer -->
+    {% include '_sidebar_drawer.html' %}
+
     <!-- Navbar -->
     <header class="navbar">
         <div class="container nav-container">
-            <div class="logo">
-                <a href="{{ url_for('home') }}" class="logo-link">
-                    <span class="logo-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                <div style="display: flex; align-items: center; gap: 0.85rem;">
+                    <button type="button" class="btn-hamburger" id="sidebar-toggle"
+                        aria-label="{{ t('Toggle Navigation Menu') }}" aria-expanded="false"
+                        aria-controls="momcare-sidebar">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="logo">
+                        <a href="{{ url_for('home') }}" class="logo-link">
+                            <span class="logo-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                </svg>
+                            </span>
+                            <span class="logo-text">MomCare</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="nav-actions">
+                    {% include '_language_picker.html' %}
+                    <span class="role-badge badge-worker">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path
-                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                            <path d="M8 15v1a6 6 0 0 0 6 6h1" />
+                            <path d="M19 17a2 2 0 0 0 2-2V9a5 5 0 0 0-5-5" />
                         </svg>
+                        Healthcare Worker
                     </span>
-                    <span class="logo-text">MomCare</span>
-                </a>
+                    <span class="user-greeting-pill">{{ user['full_name'] }}</span>
+                    <a href="{{ url_for('community_growth_directory') }}" class="btn btn-outline btn-sm">{{ t('Child
+                        Growth Monitoring') }}</a>
+                    <a href="{{ url_for('home') }}" class="btn btn-outline btn-sm">{{ t('Home') }}</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">{{ t('Sign Out') }}</a>
+                </div>
             </div>
-            <div class="nav-actions">
-                {% include '_language_picker.html' %}
-                <span class="role-badge badge-worker">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path
-                            d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
-                        <path d="M8 15v1a6 6 0 0 0 6 6h1" />
-                        <path d="M19 17a2 2 0 0 0 2-2V9a5 5 0 0 0-5-5" />
-                    </svg>
-                    Healthcare Worker
-                </span>
-                <span class="user-greeting-pill">{{ user['full_name'] }}</span>
-                <a href="{{ url_for('community_growth_directory') }}" class="btn btn-outline btn-sm">{{ t('Child Growth Monitoring') }}</a>
-                <a href="{{ url_for('home') }}" class="btn btn-outline btn-sm">{{ t('Home') }}</a>
-                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">{{ t('Sign Out') }}</a>
-            </div>
-        </div>
     </header>
 
     <main class="container dashboard-container">
-        <!-- Flash Messages -->
+        <!-- Light Sage-Green Welcome Strip (Matching Reference Design) -->
+        <div class="worker-welcome-strip">
+            <span>{{ t('Welcome back, {name}!', name=user['full_name']) }}</span>
+        </div>
+
+        <!-- Flash Messages (Excluding duplicate welcome message) -->
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
+        {% set non_welcome = [] %}
+        {% for category, message in messages %}
+        {% if not message.startswith('Welcome back') %}
+        {% set _ = non_welcome.append((category, message)) %}
+        {% endif %}
+        {% endfor %}
+        {% if non_welcome %}
         <div class="flash-container">
-            {% for category, message in messages %}
+            {% for category, message in non_welcome %}
             <div class="alert alert-{{ category }}">
                 <span>{{ t(message) }}</span>
             </div>
             {% endfor %}
         </div>
         {% endif %}
+        {% endif %}
         {% endwith %}
 
-        <!-- Deep Forest Green Welcome Banner -->
-        <section class="dashboard-hero-banner">
+        <!-- Deep Forest Green Welcome Banner (Matching Reference Design) -->
+        <section class="dashboard-hero-banner worker-hero-banner">
             <div class="banner-content">
                 <div class="banner-badge">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                         <path
-                            d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                     </svg>
                     {{ t('Healthcare Worker Portal') }}
                 </div>
                 <h1>{{ t('Welcome, {name}', name=user['full_name']) }}</h1>
-                <p>Track registered community mothers, coordinate antenatal checkups, and record field home visits.</p>
+                <p>{{ t('Track registered community mothers, coordinate antenatal checkups, and record field home
+                    visits.') }}</p>
             </div>
-            <div class="banner-profile-card">
-                <div class="profile-row">
-                    <span class="profile-label">Email:</span>
-                    <span class="profile-value">{{ user['email'] }}</span>
-                </div>
-                <div class="profile-row">
-                    <span class="profile-label">Phone:</span>
-                    <span class="profile-value">{{ user['phone'] }}</span>
-                </div>
-                <div class="profile-row">
-                    <span class="profile-label">Language:</span>
-                    <span class="profile-value">{{ user['language'] }}</span>
-                </div>
-                <div class="profile-row">
-                    <span class="profile-label">Primary Center:</span>
-                    <span class="profile-value">{{ t('Community Health Subcenter') }}</span>
-                </div>
+            <div class="banner-illustration worker-banner-illustration">
+                <img src="{{ url_for('static', filename='images/healthcare-worker-hero.png') }}"
+                    alt="{{ t('Healthcare worker illustration') }}" class="hero-art-img worker-hero-art-img" />
             </div>
         </section>
 
@@ -181,7 +196,8 @@
                         </svg>
                     </div>
                     <div class="stat-info">
-                        <div class="stat-number">{{ growth_stats.children_measured if growth_stats else 0 }} / {{ growth_stats.total_children if growth_stats else 0 }}</div>
+                        <div class="stat-number">{{ growth_stats.children_measured if growth_stats else 0 }} / {{
+                            growth_stats.total_children if growth_stats else 0 }}</div>
                         <div class="stat-title">{{ t('Growth Monitored') }}</div>
                     </div>
                 </div>
@@ -310,7 +326,8 @@
             <div class="table-header-row">
                 <div>
                     <h3>Community Child Growth &amp; Development Monitoring</h3>
-                    <p class="table-sub">Track child physical development, pediatric BMI, weight gain trends, and clinical follow-ups.</p>
+                    <p class="table-sub">Track child physical development, pediatric BMI, weight gain trends, and
+                        clinical follow-ups.</p>
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
                     <a href="{{ url_for('community_growth_directory') }}" class="btn btn-primary btn-sm">
@@ -330,7 +347,8 @@
 
                 {% if growth_children and growth_children|length > 0 %}
                 {% for child in growth_children[:8] %}
-                <div class="vax-vertical-row {{ 'row-overdue' if child.needs_followup else ('row-completed' if child.measurement_count > 0 else '') }}">
+                <div
+                    class="vax-vertical-row {{ 'row-overdue' if child.needs_followup else ('row-completed' if child.measurement_count > 0 else '') }}">
                     <div class="vax-name-col">
                         <div class="vax-title-row">
                             <span style="font-weight: 700; color: var(--forest-primary);">{{ child.full_name }}</span>
@@ -348,8 +366,10 @@
 
                     <div class="vax-date-col">
                         {% if child.latest_growth %}
-                        <span class="vax-date-main">{{ child.latest_growth.weight }} kg &bull; {{ child.latest_growth.height }} cm</span>
-                        <span class="vax-date-sub">Visit: {{ child.latest_growth.measurement_date }} (Gain: {{ child.latest_growth.weight_delta_str }})</span>
+                        <span class="vax-date-main">{{ child.latest_growth.weight }} kg &bull; {{
+                            child.latest_growth.height }} cm</span>
+                        <span class="vax-date-sub">Visit: {{ child.latest_growth.measurement_date }} (Gain: {{
+                            child.latest_growth.weight_delta_str }})</span>
                         {% else %}
                         <span class="vax-date-main" style="color: var(--text-muted); font-style: italic;">
                             {{ child.birth_weight ~ ' kg (Birth)' if child.birth_weight else 'No measurements' }}
@@ -360,10 +380,12 @@
 
                     <div>
                         {% if child.latest_growth %}
-                        <div style="font-weight: 600; font-size: 0.85rem; color: var(--forest-primary); margin-bottom: 0.25rem;">
+                        <div
+                            style="font-weight: 600; font-size: 0.85rem; color: var(--forest-primary); margin-bottom: 0.25rem;">
                             BMI: {{ child.latest_growth.bmi ~ ' kg/m²' if child.latest_growth.bmi else '—' }}
                         </div>
-                        <span class="status-pill-{{ 'overdue' if child.needs_followup else 'completed' }}" style="font-size: 0.725rem;">
+                        <span class="status-pill-{{ 'overdue' if child.needs_followup else 'completed' }}"
+                            style="font-size: 0.725rem;">
                             {{ child.latest_growth.who_status }}
                         </span>
                         {% else %}
@@ -391,8 +413,10 @@
             </div>
 
             <div style="margin-top: 1rem; text-align: right;">
-                <a href="{{ url_for('community_growth_directory') }}" style="font-weight: 700; color: var(--forest-primary); font-size: 0.875rem;">
-                    View all {{ growth_children|length if growth_children else 0 }} children in Growth Monitoring Directory &rarr;
+                <a href="{{ url_for('community_growth_directory') }}"
+                    style="font-weight: 700; color: var(--forest-primary); font-size: 0.875rem;">
+                    View all {{ growth_children|length if growth_children else 0 }} children in Growth Monitoring
+                    Directory &rarr;
                 </a>
             </div>
         </section>
@@ -458,6 +482,7 @@
             <p class="footer-note">Compassionate care for every mother and child.</p>
         </div>
     </footer>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 
 </html>

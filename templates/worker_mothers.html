@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t('Registered Mothers') }} - MomCare Healthcare Worker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="dashboard-body">
+    <!-- Collapsible Side Navigation Drawer -->
+    {% include '_sidebar_drawer.html' %}
+
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <button type="button" class="btn-hamburger" id="sidebar-toggle"
+                    aria-label="{{ t('Toggle Navigation Menu') }}" aria-expanded="false"
+                    aria-controls="momcare-sidebar">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="logo">
+                    <a href="{{ url_for('home') }}" class="logo-link">
+                        <span class="logo-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                            </svg>
+                        </span>
+                        <span class="logo-text">MomCare</span>
+                    </a>
+                </div>
+            </div>
+            <div class="nav-actions">
+                {% include '_language_picker.html' %}
+                <span class="role-badge badge-worker">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                        <path d="M8 15v1a6 6 0 0 0 6 6h1" />
+                        <path d="M19 17a2 2 0 0 0 2-2V9a5 5 0 0 0-5-5" />
+                    </svg>
+                    Healthcare Worker
+                </span>
+                <span class="user-greeting-pill">{{ user['full_name'] }}</span>
+                <a href="{{ url_for('worker_dashboard') }}" class="btn btn-outline btn-sm">{{ t('Provider Dashboard') }}</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary-outline btn-sm">{{ t('Sign Out') }}</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container dashboard-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                <span>{{ t(message) }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Feature Header Banner -->
+        <section class="dashboard-hero-banner" style="background: linear-gradient(135deg, #16362A 0%, #1A3A2D 100%); border-radius: 24px; padding: 2.25rem 2.5rem; margin-bottom: 2rem; color: #fff;">
+            <div class="banner-content">
+                <div class="banner-badge" style="background: #B67368; color: #fff; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.4rem 1rem; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; width: fit-content;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    {{ t('Community Beneficiaries') }}
+                </div>
+                <h1 style="font-family: var(--font-heading); font-size: 2.35rem; font-weight: 800; color: #fff; margin: 0 0 0.65rem 0;">{{ t('Registered Community Mothers') }}</h1>
+                <p style="color: #BDD4C8; font-size: 1.05rem; line-height: 1.5; margin: 0; max-width: 650px;">{{ t('Complete live directory of community mothers loaded directly from the database.') }}</p>
+            </div>
+        </section>
+
+        <!-- Registered Mothers Content Table -->
+        <section class="table-section" id="registered-mothers-section" style="background: #FFFFFF; border-radius: 20px; border: 1px solid rgba(7, 53, 40, 0.08); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); padding: 2rem; margin-bottom: 3rem;">
+            <div class="table-header-row" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem;">
+                <div>
+                    <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--forest-primary); margin: 0 0 0.25rem 0;">
+                        {{ t('Beneficiary Directory') }} ({{ mothers|length }})
+                    </h2>
+                    <p class="table-sub" style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">
+                        {{ t('Monitor maternal registration status, assigned contact information, and schedule home visits.') }}
+                    </p>
+                </div>
+                <a href="{{ url_for('worker_register_mother') }}" class="btn btn-primary btn-sm" style="font-weight: 600; border-radius: 10px;">
+                    + {{ t('Register New Mother in Field') }}
+                </a>
+            </div>
+
+            <!-- Search Filter Box -->
+            <form action="{{ url_for('worker_registered_mothers') }}" method="GET" class="search-filter-box" style="margin-bottom: 1.75rem; display: flex; gap: 0.75rem;">
+                <input type="text" name="q" value="{{ search_query or '' }}"
+                    placeholder="{{ t('Search mother by name, email, or contact phone...') }}" class="search-input-field"
+                    style="flex: 1; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid #D1D5DB; font-size: 0.95rem;">
+                <button type="submit" class="btn btn-primary btn-sm" style="border-radius: 10px; padding: 0.75rem 1.25rem;">{{ t('Search') }}</button>
+                {% if search_query %}
+                <a href="{{ url_for('worker_registered_mothers') }}" class="btn btn-outline btn-sm" style="border-radius: 10px; padding: 0.75rem 1.25rem;">{{ t('Clear Filter') }}</a>
+                {% endif %}
+            </form>
+
+            {% if mothers and mothers|length > 0 %}
+            <div class="table-responsive">
+                <table class="data-table" style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                    <thead>
+                        <tr style="background: #F8FAF9; text-align: left; font-size: 0.825rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8; border-top-left-radius: 10px;">#ID</th>
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8;">{{ t("Mother's Name") }}</th>
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8;">{{ t('Contact Phone') }}</th>
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8;">{{ t('Maternal Status') }}</th>
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8;">{{ t('Children') }}</th>
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8;">{{ t('Language') }}</th>
+                            <th style="padding: 1rem 1.25rem; border-bottom: 1px solid #E5EBE8; text-align: right; border-top-right-radius: 10px;">{{ t('Actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in mothers %}
+                        <tr style="border-bottom: 1px solid #F0F4F2; font-size: 0.925rem;">
+                            <td style="padding: 1rem 1.25rem; color: var(--text-secondary); font-family: monospace;">#{{ m['id'] }}</td>
+                            <td style="padding: 1rem 1.25rem;">
+                                <div style="font-weight: 700; color: var(--forest-primary);">{{ m['full_name'] }}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">{{ m['email'] }}</div>
+                            </td>
+                            <td style="padding: 1rem 1.25rem; color: var(--forest-primary); font-weight: 500;">
+                                {{ m['phone'] or '—' }}
+                            </td>
+                            <td style="padding: 1rem 1.25rem;">
+                                {% if m.profile and m.profile.pregnancy_status == 'Pregnant' %}
+                                <span style="background: #FEF3C7; color: #92400E; padding: 0.25rem 0.65rem; border-radius: 12px; font-size: 0.775rem; font-weight: 600;">
+                                    🤰 {{ t('Pregnant') }} ({{ m.profile.edd if m.profile.edd else 'EDD pending' }})
+                                </span>
+                                {% elif m.profile and m.profile.pregnancy_status == 'Postnatal' %}
+                                <span style="background: #E0E7FF; color: #3730A3; padding: 0.25rem 0.65rem; border-radius: 12px; font-size: 0.775rem; font-weight: 600;">
+                                    👶 {{ t('Postnatal Care') }}
+                                </span>
+                                {% else %}
+                                <span style="background: #F3F4F6; color: #4B5563; padding: 0.25rem 0.65rem; border-radius: 12px; font-size: 0.775rem; font-weight: 600;">
+                                    {{ t('Registered') }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 1rem 1.25rem; font-weight: 600; color: var(--forest-primary);">
+                                {{ m.children_count }} {{ t('registered') }}
+                            </td>
+                            <td style="padding: 1rem 1.25rem;">
+                                <span class="badge badge-light" style="font-size: 0.8rem;">{{ m['language'] }}</span>
+                            </td>
+                            <td style="padding: 1rem 1.25rem; text-align: right;">
+                                <div style="display: inline-flex; gap: 0.5rem; justify-content: flex-end;">
+                                    <a href="{{ url_for('worker_field_visits', mother_id=m['id']) }}" class="btn btn-primary btn-xs" style="border-radius: 6px; padding: 0.35rem 0.75rem;">
+                                        {{ t('Log Visit') }}
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding: 3rem 1.5rem; text-align: center; color: var(--text-secondary);">
+                <p>{{ t('No community mothers found matching your criteria.') }}</p>
+                <a href="{{ url_for('worker_register_mother') }}" class="btn btn-primary btn-sm" style="margin-top: 0.75rem;">
+                    + {{ t('Register New Mother') }}
+                </a>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 MomCare. Logged in as {{ user['full_name'] }} (Healthcare Worker).</p>
+            <p class="footer-note">Compassionate care for every mother and child.</p>
+        </div>
+    </footer>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
